@@ -103,51 +103,52 @@ int ToBase16(uint32_t* c, uint8_t* b){
     int carry = ((c[0] >> 24) != 0)? 1 : 0; 
 }
 
-//Function to add numbers in base 29
-void ADD(uint32_t* num1, uint32_t* num2, uint8_t* res){
-    uint32_t sum[9];
-    uint32_t carry = 0;
+//Function to add packed numbers in base 29
+void ADD(uint32_t* num1, uint32_t* num2, uint32_t* sum, uint32_t carry){
+    uint32_t mask = 0x1FFFFFFF; // 29-bit mask: 0x1FFFFFFF
+    
     for (int i = 8; i >= 0; i--){
         sum[i] = num1[i] + num2[i] + carry;
         carry = (i == 0)? (sum[i] >> 24) : (sum[i] >> 29);
-        //printf("%08x ",sum[i]);
+        sum[i] &= mask; //keep elements with least significant 29 bits
     }
-    printf("\n");
-    ToBase16(sum, res);
-    printBytes(res,32);
+}
 
-    printBytes(prime,32);
+//Function to add numbers in prime field
+void FieldAddition(uint32_t* num1, uint32_t* num2, uint8_t* res){
+    uint32_t sum[9];
+    ADD(num1, num2, sum, 0);
+
+    //Pack the prime to base 29
     uint32_t p[9];
     ToBase29(prime, p);
-    for (int i = 0 ;i < 9; i++){
-        printf("%08x ",p[i]);
-    }
-    printf("\n");
 
+    //computing Complement of the prime
+    uint8_t prime_comp[32]; 
+    for(int i = 31; i>= 0; i--){
+        prime_comp[i] = ~prime[i];
+    }
+    //Pack complement of the prime to base 29
+    uint32_t p_comp[9];
+    ToBase29(prime_comp, p_comp);
+
+    //To check if sum is greater than prime or not
     int IsGreater = 0;
     for(int i = 0; i < 9; i++ ){
-        if(sum[i] > prime[i]){
+        if(sum[i] > p[i]){
             IsGreater = 1;
             break;
         }
-        else if (sum[i] == prime[i]){
+        else if (sum[i] == p[i]){
             continue;
         }
         else break;
     }
-    printf("\nIsGreater = %d\n", IsGreater);
     
-    uint32_t p_comp[9];
-    uint32_t mask = 0x1FFFFFFF;
-    carry = 0;
-    if (IsGreater == 1){
-        for(int i = 8; i >= 0; i--){
-            p_comp[i] = (~p[i] + 1) & mask;
-            sum[i] = (sum[i] + p_comp[i] + carry) & mask;
-            carry = (i == 0)? (sum[i] >> 24) : (sum[i] >> 29);
-        }
-    }
-    printf("\n");
-
+    //reduction for to make sum a field element, i.e., if sum if greater than p, return sum-p; else return sum    
+    (IsGreater == 1)? ADD(sum,p,sum,1) : NULL;   //subtraction 'sum-p' is done using 2's complement
+    
+    //Convert packed number back to base 16 for output
     ToBase16(sum, res);
 }
+
