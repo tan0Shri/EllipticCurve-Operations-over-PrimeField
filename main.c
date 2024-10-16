@@ -27,17 +27,20 @@ int main()
 
     //Convert num1 into base 29
     uint32_t n1[9];
-    ToBase29(num1,n1); 
+    ToBase29(num1, n1); 
 
     //Convert num2 into base 29
     uint32_t n2[9];
-    ToBase29(num2,n2);
+    ToBase29(num2, n2);
 
     //Adding num1 and num2
     uint8_t sum[32];
     FieldAddition(n1, n2, sum);  
     printf("Sum :\n");  
-    printBytes(sum,32);
+    printBytes(sum, 32);
+
+    uint8_t result[32];
+    Mult(n1, n2, result);
 }
 
 

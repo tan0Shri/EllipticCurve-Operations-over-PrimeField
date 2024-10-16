@@ -1,6 +1,8 @@
 #include<stdio.h>
 #include "utilities.h"
 
+uint32_t mask = 0x1FFFFFFF; // 29-bit mask: 0x1FFFFFFF
+
 uint8_t prime[32] = {0xe9, 0x2e, 0x40, 0xad, 0x6f, 0x28, 0x1c, 0x8a,
                      0x08, 0x2a, 0xfd, 0xc4, 0x9e, 0x13, 0x72, 0x65,
                      0x94, 0x55, 0xbe, 0xc8, 0xce, 0xea, 0x04, 0x3a,
@@ -102,9 +104,7 @@ void ToBase16(uint32_t* src, uint8_t* dest){
 }
 
 //Function to add packed numbers in base 29
-void ADD(uint32_t* num1, uint32_t* num2, uint32_t* sum, uint32_t carry){
-    uint32_t mask = 0x1FFFFFFF; // 29-bit mask: 0x1FFFFFFF
-    
+void ADD(uint32_t* num1, uint32_t* num2, uint32_t* sum, uint32_t carry){    
     for (int i = 8; i >= 0; i--){
         sum[i] = num1[i] + num2[i] + carry;
         carry = (i == 0)? (sum[i] >> 24) : (sum[i] >> 29);
@@ -150,3 +150,44 @@ void FieldAddition(uint32_t* num1, uint32_t* num2, uint8_t* result){
     ToBase16(sum, result);
 }
 
+//Function to multiply numbers in prime field
+void Mult(uint32_t* num1, uint32_t* num2, uint8_t* result){
+    /*printf("\n");
+    for(int i = 0; i < 9; i++){
+        printf("%08x ",num1[i]);
+    }
+    printf("\n");
+    for(int i = 0; i < 9; i++){
+        printf("%08x ",num2[i]);
+    }
+    printf("\n");*/
+
+    uint64_t mult[17];    
+    for(int i = 0; i < 2*9-1; i++){
+        for(int j = 0; j < 9; j++){
+            if(i-j >= 0 && i-j<8){
+                mult[i] += (uint64_t)num1[j] * (uint64_t)num2[i-j];
+            } 
+        }
+    }
+    printf("\n");
+    for(int i = 0; i < 17; i++){
+        printf("%016llx ",mult[i]);
+    }
+    printf("\n");
+    uint32_t res[17];
+    uint64_t carry = 0;
+    for(int i = 16; i >= 0; i--){
+        mult[i] += carry;
+        carry = (mult[i] >> 29);
+        res[i] = (uint32_t)(mult[i] & mask);
+    }
+    
+    printf("\n");
+    for(int i = 0; i < 17; i++){
+        printf("%08x ",res[i]);
+    }
+    printf("\n");
+    ToBase16(res, result);
+    printBytes(result,64);
+}

@@ -3,7 +3,7 @@
 
 int main()
 {
-    uint8_t a = 0x12 ;
-    uint8_t b = 0xef ;
-    printf("%x", (0x16 + ~0x1f));
+    uint64_t a = (uint64_t)0x1fffffff ;
+    uint64_t b = (uint64_t)0x1fffffff ;
+    printf("%016llx", (uint64_t)(a*b));
 }
