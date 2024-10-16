@@ -7,24 +7,24 @@ uint8_t prime[32] = {0xe9, 0x2e, 0x40, 0xad, 0x6f, 0x28, 0x1c, 0x8a,
                      0x61, 0x4c, 0x83, 0x5b, 0x7f, 0xe9, 0xef, 0xf5};
 
 //Function to print bytes
-void printBytes(uint8_t* a, int num){
-    for(int i = 0; i < num; i++){
-        printf("%02x ",a[i]);
+void printBytes(uint8_t* num, int bytes){
+    for(int i = 0; i < bytes; i++){
+        printf("%02x ",num[i]);
     }
     printf("\n");
 }
 
 // Function to convert a number to base 29
-void ToBase29(uint8_t* b, uint32_t* c){
-    c[8] = ((uint32_t)b[31] | ((uint32_t)b[30] << 8) | ((uint32_t)b[29] << 16) | ((uint32_t)b[28] << 24)) & 0x1fffffff;
-    c[7] = ((uint32_t)b[28] >> 5) | ((uint32_t)b[27] << 3) | ((uint32_t)b[26] << 11) | ((uint32_t)b[25] << 19) | ((uint32_t)b[24] << 27) & 0x1fffffff;
-    c[6] = ((uint32_t)b[24] >> 2) | ((uint32_t)b[23] << 6) | ((uint32_t)b[22] << 14) | ((uint32_t)b[21] << 22) & 0x1fffffff;
-    c[5] = ((uint32_t)b[21] >> 7) | ((uint32_t)b[20] << 1) | ((uint32_t)b[19] << 9) | ((uint32_t)b[18] << 17) | ((uint32_t)b[17] <<25) & 0x1fffffff;
-    c[4] = ((uint32_t)b[17] >> 4) | ((uint32_t)b[16] << 4) | ((uint32_t)b[15] << 12) | ((uint32_t)b[14] << 20) | ((uint32_t)b[13] << 28) & 0x1fffffff; 
-    c[3] = ((uint32_t)b[13] >> 1) | ((uint32_t)b[12] << 7) | ((uint32_t)b[11] << 15) | ((uint32_t)b[10] << 23) & 0x1fffffff;
-    c[2] = ((uint32_t)b[10] >> 6) | ((uint32_t)b[9] << 2) | ((uint32_t)b[8] << 10) | ((uint32_t)b[7] << 18) | ((uint32_t)b[6] << 26) & 0x1fffffff;
-    c[1] = ((uint32_t)b[6] >> 3) | ((uint32_t)b[5] << 5) | ((uint32_t)b[4] << 13) | ((uint32_t)b[3] << 21) & 0x1fffffff;
-    c[0] = (uint32_t)b[2] | ((uint32_t)b[1] << 8) | ((uint32_t)b[0] << 16) & 0x0fffffff;
+void ToBase29(uint8_t* src, uint32_t* dest){
+    dest[8] = ((uint32_t)src[31] | ((uint32_t)src[30] << 8) | ((uint32_t)src[29] << 16) | ((uint32_t)src[28] << 24)) & 0x1fffffff;
+    dest[7] = ((uint32_t)src[28] >> 5) | ((uint32_t)src[27] << 3) | ((uint32_t)src[26] << 11) | ((uint32_t)src[25] << 19) | ((uint32_t)src[24] << 27) & 0x1fffffff;
+    dest[6] = ((uint32_t)src[24] >> 2) | ((uint32_t)src[23] << 6) | ((uint32_t)src[22] << 14) | ((uint32_t)src[21] << 22) & 0x1fffffff;
+    dest[5] = ((uint32_t)src[21] >> 7) | ((uint32_t)src[20] << 1) | ((uint32_t)src[19] << 9) | ((uint32_t)src[18] << 17) | ((uint32_t)src[17] <<25) & 0x1fffffff;
+    dest[4] = ((uint32_t)src[17] >> 4) | ((uint32_t)src[16] << 4) | ((uint32_t)src[15] << 12) | ((uint32_t)src[14] << 20) | ((uint32_t)src[13] << 28) & 0x1fffffff; 
+    dest[3] = ((uint32_t)src[13] >> 1) | ((uint32_t)src[12] << 7) | ((uint32_t)src[11] << 15) | ((uint32_t)src[10] << 23) & 0x1fffffff;
+    dest[2] = ((uint32_t)src[10] >> 6) | ((uint32_t)src[9] << 2) | ((uint32_t)src[8] << 10) | ((uint32_t)src[7] << 18) | ((uint32_t)src[6] << 26) & 0x1fffffff;
+    dest[1] = ((uint32_t)src[6] >> 3) | ((uint32_t)src[5] << 5) | ((uint32_t)src[4] << 13) | ((uint32_t)src[3] << 21) & 0x1fffffff;
+    dest[0] = (uint32_t)src[2] | ((uint32_t)src[1] << 8) | ((uint32_t)src[0] << 16) & 0x0fffffff;
 }
 
 /*void ToBase29(uint8_t* b, uint32_t* c) {
@@ -58,49 +58,47 @@ void ToBase29(uint8_t* b, uint32_t* c){
 }*/
 
 //Function to convert a number to base 16
-int ToBase16(uint32_t* c, uint8_t* b){
-    b[31] = (uint8_t)c[8];
-    b[30] = (uint8_t)(c[8] >> 8);
-    b[29] = (uint8_t)(c[8] >> 16);
-    b[28] = ((uint8_t)(c[8] >> 24)) | ((uint8_t)(c[7] << 5));
+void ToBase16(uint32_t* src, uint8_t* dest){
+    dest[31] = (uint8_t)src[8];
+    dest[30] = (uint8_t)(src[8] >> 8);
+    dest[29] = (uint8_t)(src[8] >> 16);
+    dest[28] = ((uint8_t)(src[8] >> 24)) | ((uint8_t)(src[7] << 5));
 
-    b[27] = ((uint8_t)(c[7] >> 3));
-    b[26] = ((uint8_t)(c[7] >> 11));
-    b[25] = ((uint8_t)(c[7] >> 19));
-    b[24] = ((uint8_t)(c[7] >> 27)) | ((uint8_t)(c[6] << 2));
+    dest[27] = ((uint8_t)(src[7] >> 3));
+    dest[26] = ((uint8_t)(src[7] >> 11));
+    dest[25] = ((uint8_t)(src[7] >> 19));
+    dest[24] = ((uint8_t)(src[7] >> 27)) | ((uint8_t)(src[6] << 2));
 
-    b[23] = ((uint8_t)(c[6] >> 6));
-    b[22] = ((uint8_t)(c[6] >> 14));
-    b[21] = ((uint8_t)(c[6] >> 22)) | ((uint8_t)(c[5] << 7));
+    dest[23] = ((uint8_t)(src[6] >> 6));
+    dest[22] = ((uint8_t)(src[6] >> 14));
+    dest[21] = ((uint8_t)(src[6] >> 22)) | ((uint8_t)(src[5] << 7));
 
-    b[20] = ((uint8_t)(c[5] >> 1));
-    b[19] = ((uint8_t)(c[5] >> 9));
-    b[18] = ((uint8_t)(c[5] >> 17));
-    b[17] = ((uint8_t)(c[5] >> 25)) | ((uint8_t)c[4] << 4);
+    dest[20] = ((uint8_t)(src[5] >> 1));
+    dest[19] = ((uint8_t)(src[5] >> 9));
+    dest[18] = ((uint8_t)(src[5] >> 17));
+    dest[17] = ((uint8_t)(src[5] >> 25)) | ((uint8_t)src[4] << 4);
     
-    b[16] = ((uint8_t)(c[4] >> 4));
-    b[15] = ((uint8_t)(c[4] >> 12));
-    b[14] = ((uint8_t)(c[4] >> 20));
-    b[13] = ((uint8_t)(c[4] >> 28)) | ((uint8_t)(c[3] << 1)); 
+    dest[16] = ((uint8_t)(src[4] >> 4));
+    dest[15] = ((uint8_t)(src[4] >> 12));
+    dest[14] = ((uint8_t)(src[4] >> 20));
+    dest[13] = ((uint8_t)(src[4] >> 28)) | ((uint8_t)(src[3] << 1)); 
 
-    b[12] = ((uint8_t)(c[3] >> 7));
-    b[11] = ((uint8_t)(c[3] >> 15));
-    b[10] = ((uint8_t)(c[3] >> 23)) | ((uint8_t)(c[2] << 6));
+    dest[12] = ((uint8_t)(src[3] >> 7));
+    dest[11] = ((uint8_t)(src[3] >> 15));
+    dest[10] = ((uint8_t)(src[3] >> 23)) | ((uint8_t)(src[2] << 6));
 
-    b[9] = ((uint8_t)(c[2] >> 2));
-    b[8] = ((uint8_t)(c[2] >> 10));
-    b[7] = ((uint8_t)(c[2] >> 18));
-    b[6] = ((uint8_t)(c[2] >> 26)) | ((uint8_t)(c[1] << 3));
+    dest[9] = ((uint8_t)(src[2] >> 2));
+    dest[8] = ((uint8_t)(src[2] >> 10));
+    dest[7] = ((uint8_t)(src[2] >> 18));
+    dest[6] = ((uint8_t)(src[2] >> 26)) | ((uint8_t)(src[1] << 3));
 
-    b[5] = ((uint8_t)(c[1] >> 5));
-    b[4] = ((uint8_t)(c[1] >> 13));
-    b[3] = ((uint8_t)(c[1] >> 21)); 
+    dest[5] = ((uint8_t)(src[1] >> 5));
+    dest[4] = ((uint8_t)(src[1] >> 13));
+    dest[3] = ((uint8_t)(src[1] >> 21)); 
     
-    b[2] = (uint8_t)c[0];
-    b[1] = ((uint8_t)(c[0] >> 8));
-    b[0] = ((uint8_t)(c[0] >> 16));
-
-    int carry = ((c[0] >> 24) != 0)? 1 : 0; 
+    dest[2] = (uint8_t)src[0];
+    dest[1] = ((uint8_t)(src[0] >> 8));
+    dest[0] = ((uint8_t)(src[0] >> 16));
 }
 
 //Function to add packed numbers in base 29
@@ -115,7 +113,7 @@ void ADD(uint32_t* num1, uint32_t* num2, uint32_t* sum, uint32_t carry){
 }
 
 //Function to add numbers in prime field
-void FieldAddition(uint32_t* num1, uint32_t* num2, uint8_t* res){
+void FieldAddition(uint32_t* num1, uint32_t* num2, uint8_t* result){
     uint32_t sum[9];
     ADD(num1, num2, sum, 0);
 
@@ -149,6 +147,6 @@ void FieldAddition(uint32_t* num1, uint32_t* num2, uint8_t* res){
     (IsGreater == 1)? ADD(sum,p,sum,1) : NULL;   //subtraction 'sum-p' is done using 2's complement
     
     //Convert packed number back to base 16 for output
-    ToBase16(sum, res);
+    ToBase16(sum, result);
 }
 
