@@ -121,14 +121,11 @@ void FieldAddition(uint32_t* num1, uint32_t* num2, uint8_t* result){
     uint32_t p[9];
     ToBase29(prime, p);
 
-    //computing Complement of the prime
-    uint8_t prime_comp[32]; 
-    for(int i = 31; i>= 0; i--){
-        prime_comp[i] = ~prime[i];
-    }
-    //Pack complement of the prime to base 29
+    //compute complement of the p (base 29)
     uint32_t p_comp[9];
-    ToBase29(prime_comp, p_comp);
+    for(int i = 8; i >= 0; i--){
+        p_comp[i] = p[i] ^ mask; //XORing with all 1's would flip the bits (29 LS bits)
+    }
 
     //To check if sum is greater than prime or not
     int IsGreater = 0;
@@ -144,7 +141,7 @@ void FieldAddition(uint32_t* num1, uint32_t* num2, uint8_t* result){
     }
     
     //reduction for to make sum a field element, i.e., if sum if greater than p, return sum-p; else return sum    
-    (IsGreater == 1)? ADD(sum,p,sum,1) : NULL;   //subtraction 'sum-p' is done using 2's complement
+    (IsGreater == 1)? ADD(sum,p_comp,sum,1) : NULL;   //subtraction 'sum-p' is done using 2's complement
     
     //Convert packed number back to base 16 for output
     ToBase16(sum, result);

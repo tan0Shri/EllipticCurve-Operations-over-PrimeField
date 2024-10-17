@@ -39,8 +39,8 @@ int main()
     printf("Sum :\n");  
     printBytes(sum, 32);
 
-    uint8_t result[32];
-    Mult(n1, n2, result);
+    //uint8_t result[32];
+    //Mult(n1, n2, result);
 }
 
 
