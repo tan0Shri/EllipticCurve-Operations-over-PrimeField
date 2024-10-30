@@ -149,10 +149,10 @@ int IsGreater(uint32_t* num1, uint32_t* num2){
 void FieldAddition(uint32_t* num1, uint32_t* num2, uint8_t* result){
     uint32_t* sum;
     ADD(num1, num2, sum);
-    
+
     //Pack the prime to base 29
     uint32_t* p;
-    ToBase29(prime, p, 32);
+    ToBase29(prime, p, 34);
     
     //reduction for to make sum a field element, i.e., if sum if greater than p, return sum-p; else return sum    
     (IsGreater(sum, p) == 1)? SUB(sum,p,sum) : NULL;   //subtraction 'sum-p' is done using 2's complement
@@ -199,7 +199,6 @@ void Mult(uint32_t* num1, uint32_t* num2, uint32_t* result){
     for(int i = 2*L-1; i >= 0; i--){
         printf("%08llx ",result[i]);
     }*/
-
 }
 uint8_t mu[34] = {0x04, 0x64,
                  0x35, 0xb5, 0xa4, 0x0b, 0xbb, 0x8b, 0x91, 0xa5,
@@ -247,7 +246,7 @@ void FieldMult(uint32_t* num1, uint32_t* num2, uint8_t* result){
 
     //Pack the prime to base 29
     uint32_t p[10];
-    ToBase29(prime, p, 32);
+    ToBase29(prime, p, 34);
 
     uint32_t temp1[10];
     Barrett_Red(temp, p, temp1);

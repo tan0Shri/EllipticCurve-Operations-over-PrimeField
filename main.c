@@ -11,7 +11,7 @@ int main()
     uint8_t num1[32] = {0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 
                         0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f,
                         0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 
-                        0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x0f};  
+                        0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0xff};  
         
     /*uint8_t num1[32];
     for (int i=31;i>=0;i++){
@@ -28,7 +28,7 @@ int main()
 
     //Convert num1 into base 29
     uint32_t n1[L];
-    ToBase29(num1, n1, 32); 
+    ToBase29(num1, n1, 34); 
 
     /*ToBase16(n1, num1);
     printf("\n");
@@ -36,7 +36,7 @@ int main()
 
     //Convert num2 into base 29
     uint32_t n2[L];
-    ToBase29(num2, n2, 32);
+    ToBase29(num2, n2, 34);
 
     //Adding num1 and num2
     uint8_t sum[32];
