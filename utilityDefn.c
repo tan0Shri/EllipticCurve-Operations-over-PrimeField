@@ -10,23 +10,27 @@ uint8_t prime[32] = {0xe9, 0x2e, 0x40, 0xad, 0x6f, 0x28, 0x1c, 0x8a,
 
 //Function to print bytes
 void printBytes(uint8_t* num, int bytes){
-    for(int i = 0; i < bytes; i++){
+    for(int i = bytes-1; i >= 0; i--){
         printf("%02x ",num[i]);
     }
     printf("\n");
 }
 
 // Function to convert a number to base 29
-void ToBase29(uint8_t* src, uint32_t* dest){
-    dest[8] = ((uint32_t)src[31] | ((uint32_t)src[30] << 8) | ((uint32_t)src[29] << 16) | ((uint32_t)src[28] << 24)) & 0x1fffffff;
-    dest[7] = ((uint32_t)src[28] >> 5) | ((uint32_t)src[27] << 3) | ((uint32_t)src[26] << 11) | ((uint32_t)src[25] << 19) | ((uint32_t)src[24] << 27) & 0x1fffffff;
-    dest[6] = ((uint32_t)src[24] >> 2) | ((uint32_t)src[23] << 6) | ((uint32_t)src[22] << 14) | ((uint32_t)src[21] << 22) & 0x1fffffff;
-    dest[5] = ((uint32_t)src[21] >> 7) | ((uint32_t)src[20] << 1) | ((uint32_t)src[19] << 9) | ((uint32_t)src[18] << 17) | ((uint32_t)src[17] <<25) & 0x1fffffff;
-    dest[4] = ((uint32_t)src[17] >> 4) | ((uint32_t)src[16] << 4) | ((uint32_t)src[15] << 12) | ((uint32_t)src[14] << 20) | ((uint32_t)src[13] << 28) & 0x1fffffff; 
-    dest[3] = ((uint32_t)src[13] >> 1) | ((uint32_t)src[12] << 7) | ((uint32_t)src[11] << 15) | ((uint32_t)src[10] << 23) & 0x1fffffff;
-    dest[2] = ((uint32_t)src[10] >> 6) | ((uint32_t)src[9] << 2) | ((uint32_t)src[8] << 10) | ((uint32_t)src[7] << 18) | ((uint32_t)src[6] << 26) & 0x1fffffff;
-    dest[1] = ((uint32_t)src[6] >> 3) | ((uint32_t)src[5] << 5) | ((uint32_t)src[4] << 13) | ((uint32_t)src[3] << 21) & 0x1fffffff;
-    dest[0] = (uint32_t)src[2] | ((uint32_t)src[1] << 8) | ((uint32_t)src[0] << 16) & 0x0fffffff;
+void ToBase29(uint8_t* src, uint32_t* dest, int bytes){
+    dest[0] = ((uint32_t)src[0] | ((uint32_t)src[1] << 8) | ((uint32_t)src[2] << 16) | ((uint32_t)src[3] << 24)) & mask;
+    dest[1] = ((uint32_t)src[3] >> 5) | ((uint32_t)src[4] << 3) | ((uint32_t)src[5] << 11) | ((uint32_t)src[6] << 19) | ((uint32_t)src[7] << 27) & mask;
+    dest[2] = ((uint32_t)src[7] >> 2) | ((uint32_t)src[8] << 6) | ((uint32_t)src[9] << 14) | ((uint32_t)src[10] << 22) & mask;
+    dest[3] = ((uint32_t)src[10] >> 7) | ((uint32_t)src[11] << 1) | ((uint32_t)src[12] << 9) | ((uint32_t)src[13] << 17) | ((uint32_t)src[14] <<25) & mask;
+    dest[4] = ((uint32_t)src[14] >> 4) | ((uint32_t)src[15] << 4) | ((uint32_t)src[16] << 12) | ((uint32_t)src[17] << 20) | ((uint32_t)src[18] << 28) & mask; 
+    dest[5] = ((uint32_t)src[18] >> 1) | ((uint32_t)src[19] << 7) | ((uint32_t)src[20] << 15) | ((uint32_t)src[21] << 23) & mask;
+    dest[6] = ((uint32_t)src[21] >> 6) | ((uint32_t)src[22] << 2) | ((uint32_t)src[23] << 10) | ((uint32_t)src[24] << 18) | ((uint32_t)src[25] << 26) & mask;
+    dest[7] = ((uint32_t)src[25] >> 3) | ((uint32_t)src[26] << 5) | ((uint32_t)src[27] << 13) | ((uint32_t)src[28] << 21) & mask;
+    dest[8] = (uint32_t)src[29] | ((uint32_t)src[30] << 8) | ((uint32_t)src[31] << 16) & mask;
+    if (bytes == 34){
+        dest[8] = dest[8] | ((uint32_t)src[32] << 24) & mask;
+        dest[9] = (((uint32_t)src[32] >> 5) | ((uint32_t)src[33] << 3)) & mask;
+    }
 }
 
 /*void ToBase29(uint8_t* b, uint32_t* c) {
@@ -61,130 +65,189 @@ void ToBase29(uint8_t* src, uint32_t* dest){
 
 //Function to convert a number to base 16
 void ToBase16(uint32_t* src, uint8_t* dest){
-    dest[31] = (uint8_t)src[8];
-    dest[30] = (uint8_t)(src[8] >> 8);
-    dest[29] = (uint8_t)(src[8] >> 16);
-    dest[28] = ((uint8_t)(src[8] >> 24)) | ((uint8_t)(src[7] << 5));
+    dest[0] = (uint8_t)src[0];
+    dest[1] = (uint8_t)(src[0] >> 8);
+    dest[2] = (uint8_t)(src[0] >> 16);
+    dest[3] = ((uint8_t)(src[0] >> 24)) | ((uint8_t)(src[1] << 5));
 
-    dest[27] = ((uint8_t)(src[7] >> 3));
-    dest[26] = ((uint8_t)(src[7] >> 11));
-    dest[25] = ((uint8_t)(src[7] >> 19));
-    dest[24] = ((uint8_t)(src[7] >> 27)) | ((uint8_t)(src[6] << 2));
+    dest[4] = ((uint8_t)(src[1] >> 3));
+    dest[5] = ((uint8_t)(src[1] >> 11));
+    dest[6] = ((uint8_t)(src[1] >> 19));
+    dest[7] = ((uint8_t)(src[1] >> 27)) | ((uint8_t)(src[2] << 2));
 
-    dest[23] = ((uint8_t)(src[6] >> 6));
-    dest[22] = ((uint8_t)(src[6] >> 14));
-    dest[21] = ((uint8_t)(src[6] >> 22)) | ((uint8_t)(src[5] << 7));
+    dest[8] = ((uint8_t)(src[2] >> 6));
+    dest[9] = ((uint8_t)(src[2] >> 14));
+    dest[10] = ((uint8_t)(src[2] >> 22)) | ((uint8_t)(src[3] << 7));
 
-    dest[20] = ((uint8_t)(src[5] >> 1));
-    dest[19] = ((uint8_t)(src[5] >> 9));
-    dest[18] = ((uint8_t)(src[5] >> 17));
-    dest[17] = ((uint8_t)(src[5] >> 25)) | ((uint8_t)src[4] << 4);
+    dest[11] = ((uint8_t)(src[3] >> 1));
+    dest[12] = ((uint8_t)(src[3] >> 9));
+    dest[13] = ((uint8_t)(src[3] >> 17));
+    dest[14] = ((uint8_t)(src[3] >> 25)) | ((uint8_t)src[4] << 4);
     
-    dest[16] = ((uint8_t)(src[4] >> 4));
-    dest[15] = ((uint8_t)(src[4] >> 12));
-    dest[14] = ((uint8_t)(src[4] >> 20));
-    dest[13] = ((uint8_t)(src[4] >> 28)) | ((uint8_t)(src[3] << 1)); 
+    dest[15] = ((uint8_t)(src[4] >> 4));
+    dest[16] = ((uint8_t)(src[4] >> 12));
+    dest[17] = ((uint8_t)(src[4] >> 20));
+    dest[18] = ((uint8_t)(src[4] >> 28)) | ((uint8_t)(src[5] << 1)); 
 
-    dest[12] = ((uint8_t)(src[3] >> 7));
-    dest[11] = ((uint8_t)(src[3] >> 15));
-    dest[10] = ((uint8_t)(src[3] >> 23)) | ((uint8_t)(src[2] << 6));
+    dest[19] = ((uint8_t)(src[5] >> 7));
+    dest[20] = ((uint8_t)(src[5] >> 15));
+    dest[21] = ((uint8_t)(src[5] >> 23)) | ((uint8_t)(src[6] << 6));
 
-    dest[9] = ((uint8_t)(src[2] >> 2));
-    dest[8] = ((uint8_t)(src[2] >> 10));
-    dest[7] = ((uint8_t)(src[2] >> 18));
-    dest[6] = ((uint8_t)(src[2] >> 26)) | ((uint8_t)(src[1] << 3));
+    dest[22] = ((uint8_t)(src[6] >> 2));
+    dest[23] = ((uint8_t)(src[6] >> 10));
+    dest[24] = ((uint8_t)(src[6] >> 18));
+    dest[25] = ((uint8_t)(src[6] >> 26)) | ((uint8_t)(src[7] << 3));
 
-    dest[5] = ((uint8_t)(src[1] >> 5));
-    dest[4] = ((uint8_t)(src[1] >> 13));
-    dest[3] = ((uint8_t)(src[1] >> 21)); 
+    dest[26] = ((uint8_t)(src[7] >> 5));
+    dest[27] = ((uint8_t)(src[7] >> 13));
+    dest[28] = ((uint8_t)(src[7] >> 21)); 
     
-    dest[2] = (uint8_t)src[0];
-    dest[1] = ((uint8_t)(src[0] >> 8));
-    dest[0] = ((uint8_t)(src[0] >> 16));
+    dest[29] = (uint8_t)src[8];
+    dest[30] = ((uint8_t)(src[8] >> 8));
+    dest[31] = ((uint8_t)(src[8] >> 16));
 }
 
 //Function to add packed numbers in base 29
-void ADD(uint32_t* num1, uint32_t* num2, uint32_t* sum, uint32_t carry){    
-    for (int i = 8; i >= 0; i--){
+void ADD(uint32_t* num1, uint32_t* num2, uint32_t* sum){ 
+    uint32_t carry = 0;   
+    for (int i = 0; i < 9; i++){
         sum[i] = num1[i] + num2[i] + carry;
-        carry = (i == 0)? (sum[i] >> 24) : (sum[i] >> 29);
+        carry = (i == 8)? (sum[i] >> 24) : (sum[i] >> 29);
         sum[i] &= mask; //keep elements with least significant 29 bits
     }
+}
+
+//Function to subtract packed numbers in base 29 using 2's complement
+void SUB(uint32_t* num1, uint32_t* num2, uint32_t* result){
+	uint32_t carry = 1;
+	for (int i=0; i < 10; i++){
+		result[i] = num1[i] + (num2[i] ^ mask) + carry;
+		carry = result[i] >> 29;
+		result[i] &= mask;
+	}
+}
+
+//To check if num1 is greater than num2 or not
+int IsGreater(uint32_t* num1, uint32_t* num2){
+    int IsGreater = 0;
+    for(int i = 9; i >= 0; i-- ){
+        if(num1[i] > num2[i]){
+            IsGreater = 1;
+            break;
+        }
+        else if (num1[i] == num2[i]){
+            continue;
+        }
+        else break;
+    }
+    return IsGreater;
 }
 
 //Function to add numbers in prime field
 void FieldAddition(uint32_t* num1, uint32_t* num2, uint8_t* result){
     uint32_t sum[9];
-    ADD(num1, num2, sum, 0);
+    ADD(num1, num2, sum);
 
     //Pack the prime to base 29
-    uint32_t p[9];
-    ToBase29(prime, p);
-
-    //compute complement of the p (base 29)
-    uint32_t p_comp[9];
-    for(int i = 8; i >= 0; i--){
-        p_comp[i] = p[i] ^ mask; //XORing with all 1's would flip the bits (29 LS bits)
-    }
-
-    //To check if sum is greater than prime or not
-    int IsGreater = 0;
-    for(int i = 0; i < 9; i++ ){
-        if(sum[i] > p[i]){
-            IsGreater = 1;
-            break;
-        }
-        else if (sum[i] == p[i]){
-            continue;
-        }
-        else break;
-    }
+    uint32_t p[10];
+    ToBase29(prime, p, 32);
     
     //reduction for to make sum a field element, i.e., if sum if greater than p, return sum-p; else return sum    
-    (IsGreater == 1)? ADD(sum,p_comp,sum,1) : NULL;   //subtraction 'sum-p' is done using 2's complement
+    (IsGreater(sum, p) == 1)? SUB(sum,p,sum) : NULL;   //subtraction 'sum-p' is done using 2's complement
     
     //Convert packed number back to base 16 for output
     ToBase16(sum, result);
 }
 
-//Function to multiply numbers in prime field
-void Mult(uint32_t* num1, uint32_t* num2, uint8_t* result){
+
+//Function to multiply packed
+void Mult(uint32_t* num1, uint32_t* num2, uint32_t* result){
+    int L = 10;
     /*printf("\n");
-    for(int i = 0; i < 9; i++){
+    for(int i = L-1; i >= 0; i--){
         printf("%08x ",num1[i]);
     }
     printf("\n");
-    for(int i = 0; i < 9; i++){
+    for(int i = L-1; i >= 0; i--){
         printf("%08x ",num2[i]);
-    }
-    printf("\n");*/
-
-    uint64_t mult[17];    
-    for(int i = 0; i < 2*9-1; i++){
-        for(int j = 0; j < 9; j++){
-            if(i-j >= 0 && i-j<8){
+    }*/
+    printf("\n");
+    //int L = 9;
+    uint64_t mult[2*L-1];    
+    for(int i = 2*L-2; i >= 0; i--){
+        for(int j = L-1; j >= 0; j--){
+            if(i-j >= 0 && i-j<L){
                 mult[i] += (uint64_t)num1[j] * (uint64_t)num2[i-j];
             } 
         }
     }
-    printf("\n");
-    for(int i = 0; i < 17; i++){
+    /*printf("\n");
+    for(int i = 2*L-2; i >= 0; i--){
         printf("%016llx ",mult[i]);
     }
-    printf("\n");
-    uint32_t res[17];
+    printf("\n");*/
+    //uint32_t res[2*L];
     uint64_t carry = 0;
-    for(int i = 16; i >= 0; i--){
+    for(int i = 0; i <= 2*L-1; i++){
         mult[i] += carry;
         carry = (mult[i] >> 29);
-        res[i] = (uint32_t)(mult[i] & mask);
-    }
+        result[i] = (uint32_t)(mult[i] & mask);
+    } 
+    /*printf("\n");
+    for(int i = 2*L-1; i >= 0; i--){
+        printf("%08llx ",result[i]);
+    }*/
+
+}
+uint8_t mu[34] = {0x04, 0x64,
+                 0x35, 0xb5, 0xa4, 0x0b, 0xbb, 0x8b, 0x91, 0xa5,
+                 0xac, 0x84, 0xa4, 0xa1, 0x18, 0x09, 0x15, 0xa5,
+                 0xee, 0xac, 0x09, 0x5b, 0xe5, 0xdc, 0x75, 0xdd,
+                 0xaf, 0xa7, 0x30, 0x29, 0x3a, 0xe0, 0x00, 0x18};
+
+void Barrett_Red(uint32_t* num, uint32_t* p, uint32_t* result){
+    int L=10;
+    uint32_t T[L];
+    ToBase29(mu, T, 34);
+
+    uint32_t Q[2*L];
+    Mult(num + L-1, T, Q);
     
-    printf("\n");
-    for(int i = 0; i < 17; i++){
-        printf("%08x ",res[i]);
+    uint32_t* r1 = num + L+1;
+    uint32_t temp[L];
+    Mult(Q + L+1, p, temp);
+    uint32_t* r2 = temp + L+1;
+    uint32_t r[L];
+    SUB(r1, r2, r);
+
+    int IsGreater = 0;
+    for(int i = 9; i >= 0; i-- ){
+        if(r[i] > p[i]){
+            IsGreater = 1;
+            break;
+        }
+        else if (r[i] == p[i]){
+            continue;
+        }
+        else break;
     }
-    printf("\n");
-    ToBase16(res, result);
-    printBytes(result,64);
+
+    for (int i =0; i<L;i++)
+		result[i] = r[i];
+
+	(IsGreater == 1)? SUB(r, p, result) : NULL;
+
+}
+
+void FieldMult(uint32_t* num1, uint32_t* num2, uint8_t* result){
+    uint32_t temp[20];
+    Mult(num1, num2, temp);
+
+    //Pack the prime to base 29
+    uint32_t p[10];
+    ToBase29(prime, p, 32);
+
+    uint32_t temp1[10];
+    Barrett_Red(temp, p, temp1);
+    ToBase16(temp1, result);
 }
