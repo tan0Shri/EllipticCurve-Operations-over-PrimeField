@@ -11,7 +11,7 @@ uint8_t prime[32] = {0xe9, 0x2e, 0x40, 0xad, 0x6f, 0x28, 0x1c, 0x8a,
 //Function to print bytes
 void printBytes(uint8_t* num, int bytes){
     for(int i = bytes-1; i >= 0; i--){
-        printf("%02x ",num[i]);
+        printf("%02x",num[i]);
     }
     printf("\n");
 }
@@ -105,6 +105,8 @@ void ToBase16(uint32_t* src, uint8_t* dest){
     dest[29] = (uint8_t)src[8];
     dest[30] = ((uint8_t)(src[8] >> 8));
     dest[31] = ((uint8_t)(src[8] >> 16));
+    //dest[32] = ((uint8_t)(src[8] >> 24)) | ((uint8_t)(src[9] << 5));
+    //dest[33] = ((uint8_t)(src[9] >> 3));
 }
 
 //Function to add packed numbers in base 29
@@ -145,11 +147,11 @@ int IsGreater(uint32_t* num1, uint32_t* num2){
 
 //Function to add numbers in prime field
 void FieldAddition(uint32_t* num1, uint32_t* num2, uint8_t* result){
-    uint32_t sum[9];
+    uint32_t* sum;
     ADD(num1, num2, sum);
-
+    
     //Pack the prime to base 29
-    uint32_t p[10];
+    uint32_t* p;
     ToBase29(prime, p, 32);
     
     //reduction for to make sum a field element, i.e., if sum if greater than p, return sum-p; else return sum    
