@@ -11,7 +11,7 @@ int main()
     uint8_t num1[32] = {0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 
                         0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f,
                         0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 
-                        0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0xff};  
+                        0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x0f};  
         
     /*uint8_t num1[32];
     for (int i=31;i>=0;i++){
@@ -44,10 +44,13 @@ int main()
     printf("Sum :\n");  
     printBytes(sum, 32);
 
-    uint8_t result[32];
-    FieldMult(n1, n2, result);
+    uint32_t result[32];
+    Mult(n1, n2, result);
     printf("MUltiplication :\n");  
-    printBytes(result, 32);
+    for (int i=L-1; i>=0; i--){
+        printf("%016llx ",result[i]);
+    }
+    //printBytes(result, 32);
 }
 
 
