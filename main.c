@@ -44,13 +44,14 @@ int main()
     printf("Sum :\n");  
     printBytes(sum, 32);
 
-    uint32_t result[32];
-    Mult(n1, n2, result);
-    printf("MUltiplication :\n");  
-    for (int i=L-1; i>=0; i--){
+    uint8_t result[32];
+    printf("HI");
+    FieldMult(n1, n2, result);
+    printf("Multiplication :\n");  
+    /*for (int i=17; i>=0; i--){
         printf("%016llx ",result[i]);
-    }
-    //printBytes(result, 32);
+    }*/
+    printBytes(result, 32);
 }
 
 

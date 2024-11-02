@@ -8,6 +8,12 @@ uint8_t prime[32] = {0xe9, 0x2e, 0x40, 0xad, 0x6f, 0x28, 0x1c, 0x8a,
                      0x94, 0x55, 0xbe, 0xc8, 0xce, 0xea, 0x04, 0x3a,
                      0x61, 0x4c, 0x83, 0x5b, 0x7f, 0xe9, 0xef, 0xf5};
 
+uint8_t mu[34] = {0x04, 0x64,
+                 0x35, 0xb5, 0xa4, 0x0b, 0xbb, 0x8b, 0x91, 0xa5,
+                 0xac, 0x84, 0xa4, 0xa1, 0x18, 0x09, 0x15, 0xa5,
+                 0xee, 0xac, 0x09, 0x5b, 0xe5, 0xdc, 0x75, 0xdd,
+                 0xaf, 0xa7, 0x30, 0x29, 0x3a, 0xe0, 0x00, 0x18};
+
 //Function to print bytes
 void printBytes(uint8_t* num, int bytes){
     for(int i = bytes-1; i >= 0; i--){
@@ -161,85 +167,58 @@ void FieldAddition(uint32_t* num1, uint32_t* num2, uint8_t* result){
     ToBase16(sum, result);
 }
 
-
-//Function to multiply packed
 void Mult(uint32_t* num1, uint32_t* num2, uint32_t* result){
-    //int L = 10;
-    /*printf("\n");
-    for(int i = L-1; i >= 0; i--){
-        printf("%08x ",num1[i]);
-    }
-    printf("\n");
-    for(int i = L-1; i >= 0; i--){
-        printf("%08x ",num2[i]);
-    }
-    printf("\n");*/
-    
-    uint64_t mult[2 * L];
+    uint64_t mult[20];
     
     // Perform multiplication  
-    for(int i = 2*L-2; i >= 0; i--){
-        for(int j = L-1; j >= 0; j--){
-            if(i-j >= 0 && i-j<L){
+    for (int i=19; i>=0; i--){
+        for (int j=9; j>=0; j--){
+            if(i-j >= 0 && i-j < 9){
                 mult[i] += (uint64_t)num1[j] * (uint64_t)num2[i-j];
-            } 
+            }
         }
     }
-    printf("\n");
-    for(int i = 2*L-2; i >= 0; i--){
-        printf("%016llx ",mult[i]);
-    }
-    printf("\n");
-    //uint32_t res[2*L];
-    
     // Convert to 29-bit representation and handle carry
     uint64_t carry = 0;
-    for(int i = 0; i < 2*L; i++){
+    for (int i=0; i<=19; i++){
         mult[i] += carry;
-        carry = (mult[i] >> 29);
+        carry = mult[i] >> 29;
         result[i] = (uint32_t)(mult[i] & mask);
-    } 
-    printf("\n");
-    for(int i = 2*L-1; i >= 0; i--){
-        printf("%08x ",result[i]);
     }
+    /*for(int i=19; i>=0; i--){
+        printf("%08x ",result[i]);
+    }*/
 }
-uint8_t mu[34] = {0x04, 0x64,
-                 0x35, 0xb5, 0xa4, 0x0b, 0xbb, 0x8b, 0x91, 0xa5,
-                 0xac, 0x84, 0xa4, 0xa1, 0x18, 0x09, 0x15, 0xa5,
-                 0xee, 0xac, 0x09, 0x5b, 0xe5, 0xdc, 0x75, 0xdd,
-                 0xaf, 0xa7, 0x30, 0x29, 0x3a, 0xe0, 0x00, 0x18};
 
 void Barrett_Red(uint32_t* num, uint32_t* p, uint32_t* result){
     
-    uint32_t T[L];
+    uint32_t T[10];
     ToBase29(mu, T, 34);
 
-    uint32_t Q[2*L];
-    Mult(num + L-1, T, Q);
+    uint32_t Q[20];
+    Mult(num +9, T, Q);
     
-    uint32_t* r1 = num + L+1;
-    uint32_t temp[L];
-    Mult(Q + L+1, p, temp);
-    uint32_t* r2 = temp + L+1;
-    uint32_t r[L];
-    SUB(r1, r2, r);
+    uint32_t* r1 = num + 11;
+    uint32_t temp[10];
+    Mult(Q + 11, p, temp);
+    uint32_t* r2 = temp + 11;
+    //uint32_t r[10];
+    SUB(r1, r2, result);
 
+    /*while(IsGreater(r,p) == 1){
+        SUB(result, p, result);
+    }*/
     int IsGreater = 0;
-    for(int i = L-1; i >= 0; i-- ){
-        if(r[i] > p[i]){
+    for(int i = 9; i >= 0; i-- ){
+        if(result[i] > p[i]){
             IsGreater = 1;
             break;
         }
-        else if (r[i] == p[i]){
+        else if (result[i] == p[i]){
             continue;
         }
         else break;
     }
-
-    for (int i =0; i<L;i++)
-		result[i] = r[i];
-
 	(IsGreater == 1)? SUB(result, p, result) : NULL;
 
 }
