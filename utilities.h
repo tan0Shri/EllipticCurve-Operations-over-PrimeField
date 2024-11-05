@@ -5,7 +5,6 @@
 
 //declaration of global array for prime 
 extern uint8_t prime[32];
-extern const int L;
 
 // Function prototypes
 void printBytes(uint8_t* num, int bytes);     // Prints byte array

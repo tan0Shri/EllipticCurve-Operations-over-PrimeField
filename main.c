@@ -1,10 +1,6 @@
 #include<stdio.h>
 #include<stdint.h>
-
-const int L = 10;
 #include "utilities.h"
-
-
 
 int main()
 {
@@ -27,30 +23,23 @@ int main()
     printBytes(num2,32);
 
     //Convert num1 into base 29
-    uint32_t n1[L];
+    uint32_t n1[10];
     ToBase29(num1, n1, 34); 
 
-    /*ToBase16(n1, num1);
-    printf("\n");
-    printBytes(num1, 32);*/
-
     //Convert num2 into base 29
-    uint32_t n2[L];
+    uint32_t n2[10];
     ToBase29(num2, n2, 34);
 
     //Adding num1 and num2
     uint8_t sum[32];
     FieldAddition(n1, n2, sum);  
-    printf("Sum :\n");  
+    printf("\nSum :\n");  
     printBytes(sum, 32);
 
+    //Multiplying num1 and num2
     uint8_t result[32];
-    printf("HI");
     FieldMult(n1, n2, result);
-    printf("Multiplication :\n");  
-    /*for (int i=17; i>=0; i--){
-        printf("%016llx ",result[i]);
-    }*/
+    printf("\nMultiplication :\n");  
     printBytes(result, 32);
 }
 
