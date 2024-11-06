@@ -23,12 +23,12 @@ int main()
     printBytes(num2,32);
 
     //Convert num1 into base 29
-    uint32_t n1[10];
-    ToBase29(num1, n1, 34); 
+    uint32_t n1[10] ={0};
+    ToBase29(num1, n1, 32); 
 
     //Convert num2 into base 29
-    uint32_t n2[10];
-    ToBase29(num2, n2, 34);
+    uint32_t n2[10] ={0};
+    ToBase29(num2, n2, 32);
 
     //Adding num1 and num2
     uint8_t sum[32];
