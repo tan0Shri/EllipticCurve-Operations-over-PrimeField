@@ -227,18 +227,8 @@ void Barrett_Red(uint32_t* num, uint32_t* p, uint32_t* result){
     /*while(IsGreater(r,p) == 1){
         SUB(result, p, result);
     }*/
-    int IsGreater = 0;
-    for(int i = 9; i >= 0; i-- ){
-        if(result[i] > p[i]){
-            IsGreater = 1;
-            break;
-        }
-        else if (result[i] == p[i]){
-            continue;
-        }
-        else break;
-    }
-	(IsGreater == 1)? SUB(result, p, result) : NULL;
+    
+	(IsGreater(result, p) == 1)? SUB(result, p, result) : NULL;
 
 }
 
