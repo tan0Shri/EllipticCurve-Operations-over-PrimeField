@@ -3,6 +3,7 @@
 
 #include<stdint.h>
 
+extern FILE* in;
 extern uint32_t mask; //mask for lower 29-bits
 
 //declaration of global array for prime and mu(for Barrett)
@@ -13,7 +14,7 @@ extern uint32_t p[10];
 
 // Function prototypes
 void printBytes(uint8_t* num, int bytes);     // Prints byte array
-void ToBase29(uint8_t* src, uint32_t* dest); // Converts data to base 29
+void ToBase29(uint8_t* src, uint32_t* dest, int bytes); // Converts data to base 29
 void ToBase16(uint32_t* src, uint8_t* dest); // Converts data to base 16 (hexadecimal)
 void ADD(uint32_t* num1, uint32_t* num2, uint32_t* sum); // Performs addition on uint32_t arrays, packed addition in base 29
 void SUB(uint32_t* num1, uint32_t* num2, uint32_t* result); //Perfoms subtraction on uint32_t arrays, packed subtraction in base 29

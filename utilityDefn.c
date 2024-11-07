@@ -1,20 +1,12 @@
 #include<stdio.h>
 #include "utilities.h"
 
+FILE* in;
+
 uint32_t mask = 0x1FFFFFFF; // 29-bit mask: 0x1FFFFFFF
-
-uint8_t prime[32] = {0xe9, 0x2e, 0x40, 0xad, 0x6f, 0x28, 0x1c, 0x8a,
-                     0x08, 0x2a, 0xfd, 0xc4, 0x9e, 0x13, 0x72, 0x65,
-                     0x94, 0x55, 0xbe, 0xc8, 0xce, 0xea, 0x04, 0x3a,
-                     0x61, 0x4c, 0x83, 0x5b, 0x7f, 0xe9, 0xef, 0xf5};
-
-uint32_t p[10] = {0};
-
-uint8_t mu[34] = {0x04, 0x64,
-                  0x35, 0xb5, 0xa4, 0x0b, 0xbb, 0x8b, 0x91, 0xa5, 
-                  0xac, 0x84, 0xa4, 0xa1, 0x18, 0x09, 0x15, 0xa5, 
-                  0xee, 0xac, 0x09, 0x5b, 0xe5, 0xdc, 0x75, 0xdd, 
-                  0xaf, 0xa7, 0x30, 0x29, 0x3a, 0xe0, 0x00, 0x18};
+uint8_t prime[32] = {0}; // prime in base 16
+uint32_t p[10] = {0};   // prime in base 29
+uint8_t mu[34] = {0};   // mu=(2^(2*29*9))/prime in base 16
 
 //Function to print bytes
 void printBytes(uint8_t* num, int bytes){
@@ -25,7 +17,7 @@ void printBytes(uint8_t* num, int bytes){
 }
 
 //Function to convert a number to base 29
-void ToBase29(uint8_t* src, uint32_t* dest){
+void ToBase29(uint8_t* src, uint32_t* dest, int bytes){
     dest[0] = ((uint32_t)src[0] | ((uint32_t)src[1] << 8) | ((uint32_t)src[2] << 16) | ((uint32_t)src[3] << 24)) & mask;
     dest[1] = ((uint32_t)src[3] >> 5) | ((uint32_t)src[4] << 3) | ((uint32_t)src[5] << 11) | ((uint32_t)src[6] << 19) | ((uint32_t)src[7] << 27) & mask;
     dest[2] = ((uint32_t)src[7] >> 2) | ((uint32_t)src[8] << 6) | ((uint32_t)src[9] << 14) | ((uint32_t)src[10] << 22) & mask;
@@ -35,10 +27,10 @@ void ToBase29(uint8_t* src, uint32_t* dest){
     dest[6] = ((uint32_t)src[21] >> 6) | ((uint32_t)src[22] << 2) | ((uint32_t)src[23] << 10) | ((uint32_t)src[24] << 18) | ((uint32_t)src[25] << 26) & mask;
     dest[7] = ((uint32_t)src[25] >> 3) | ((uint32_t)src[26] << 5) | ((uint32_t)src[27] << 13) | ((uint32_t)src[28] << 21) & mask;
     dest[8] = (uint32_t)src[29] | ((uint32_t)src[30] << 8) | ((uint32_t)src[31] << 16) & mask;
-    // if( bytes == 34){
-    //     dest[8] = dest[8] | ((uint32_t)src[32] << 24) & mask;
-    //     dest[9] = (((uint32_t)src[32] >> 5) | ((uint32_t)src[33] << 3)) & mask;
-    // }
+    if( bytes == 34){
+        dest[8] = dest[8] | ((uint32_t)src[32] << 24) & mask;
+        dest[9] = (((uint32_t)src[32] >> 5) | ((uint32_t)src[33] << 3)) & mask;
+    }
 }
 
 /*void ToBase29(uint8_t* b, uint32_t* c) {
@@ -163,6 +155,7 @@ void FieldAddition(uint32_t* num1, uint32_t* num2, uint8_t* result){
     ToBase16(sum, result);
 }
 
+//Function to multiply packed numbers in base 29
 void Mult(uint32_t* num1, uint32_t* num2, uint32_t* result){
     uint64_t mult[18] = {0};  
     // Perform multiplication  
@@ -181,6 +174,7 @@ void Mult(uint32_t* num1, uint32_t* num2, uint32_t* result){
     result[17] = carry;
 }
 
+//Function to multiply packed numbers in base 29 (particularly for Barrett)
 void Mult4Barrett(uint32_t* num1, uint32_t* num2, uint32_t* result){
     uint64_t mult[19] = {0};    
     // Perform multiplication  
@@ -199,89 +193,32 @@ void Mult4Barrett(uint32_t* num1, uint32_t* num2, uint32_t* result){
     result[19] = carry;
 }
 
+//Function for Reduction of elements into field using Barrett Reduction algorithm
 void Barrett_Red(uint32_t* num, uint32_t* p, uint32_t* result){
     
     uint32_t T[10]= {0}, q2[20] = {0}, temp[20] = {0};
     uint32_t *r1 = {0}, *r2 = {0};
 
-    // printf("\nNum: ");
-    // for(int i = 17; i>=0; i--){
-    //     printf("%08x ",num[i]);
-    // }
-    uint8_t mu_rev[34]; //reversing the prime array to follow Little Endian
-    for(int i = 0; i < 34; i++){
-            mu_rev[i] = mu[34-i-1];
-        }
-    ToBase29(mu_rev, T);
-    T[9] = 35;
-    T[8] ^= 0x4000000;
-    // printf("\nT: ");
-    // for(int i = 9; i>=0; i--){
-    //     printf("%08x ",T[i]);
-    // }
-
-    Mult4Barrett(num+8, T, q2);
-    // printf("\nq2: ");
-    // for(int i = 19; i>=0; i--){
-    //     printf("%08x ",q2[i]);
-    // }
-
-    Mult4Barrett(q2+10, p, temp);
-    // printf("\ntemp: ");
-    // for(int i = 19; i>=0; i--){
-    //     printf("%08x ",temp[i]);
-    // }
+    //copying the pre computed 'mu' from file for Barrett reduction
+    for (int i = 33; i >= 0; i--){
+        fscanf(in,"%2hhx",&mu[i]);
+    }  
+    ToBase29(mu, T, 34);
     
+    //computations for the Reduction
+    Mult4Barrett(num+8, T, q2);
+    Mult4Barrett(q2+10, p, temp);    
     r1 = num;
     r2 = temp;
-
-    // printf("\nr1: ");
-    // for(int i = 9; i>=0; i--){
-    //     printf("%08x ",r1[i]);
-    // }
-
-    // printf("\nr2: ");
-    // for(int i = 9; i>=0; i--){
-    //     printf("%08x ",r2[i]);
-    // }
-    
     SUB(r1, r2, result);
-
-    // printf("\nresult: ");
-    // for(int i = 9; i>=0; i--){
-    //     printf("%08x ",result[i]);
-    // }
-    
 	(IsGreater(result, p) == 1)? SUB(result, p, result) : NULL;
-
-    // printf("\nresult: ");
-    // for(int i = 9; i>=0; i--){
-    //     printf("%08x ",result[i]);
-    // }
     (IsGreater(result, p) == 1)? SUB(result, p, result) : NULL;
-    // printf("\nresult: ");
-    // for(int i = 9; i>=0; i--){
-    //     printf("%08x ",result[i]);
-    // }
 }
 
+//Function to multiply numbers in prime field
 void FieldMult(uint32_t* num1, uint32_t* num2, uint8_t* result){
-    // printf("\n");
-    // for(int i=9; i>=0; i--){
-    //     printf("%08x ",num1[i]);
-    // }
-    // printf("\n");
-    // for(int i=9; i>=0; i--){
-    //     printf("%08x ",num2[i]);
-    // }
-    // printf("\n");
-
     uint32_t temp[20] = {0};    
     Mult(num1, num2, temp); // Multiply num1 and num2
-    // for(int i=17; i>=0; i--){
-    //     printf("%08x ",temp[i]);
-    // }
-    printf("\n");
     
     uint32_t temp1[9]={0};    
     Barrett_Red(temp, p, temp1); // Reduce with Barrett

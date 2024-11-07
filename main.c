@@ -20,7 +20,7 @@ int main()
     //                    0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x00};
         
     // uint8_t num1[32];
-    // for (int i=31;i>=0;i++){
+    // for (int i=31;i>=0;i--){
     //     scanf("%02hhx",&num1[i]);
     // }
 
@@ -40,18 +40,24 @@ int main()
 
     //Convert num1 into base 29
     uint32_t n1[10] ={0};
-    ToBase29(num1, n1); 
+    ToBase29(num1, n1, 32); 
     
     //Convert num2 into base 29
     uint32_t n2[10] ={0};
-    ToBase29(num2, n2);
+    ToBase29(num2, n2, 32);
 
-    uint8_t p_rev[32]; //reversing the prime array to follow Little Endian
-    for(int i = 0; i < 32; i++){
-            p_rev[i] = prime[32-i-1];
-        }
+    // Opening input file
+    in = fopen("input.txt", "r");
+    if (in == NULL) {
+        perror("Error opening file");
+        return 1;
+    }
+    //copying the given prime from the file
+    for (int i = 31; i >= 0; i--){
+        fscanf(in,"%2hhx",&prime[i]);
+    }    
     //convert given prime to base 29
-    ToBase29(p_rev, p); 
+    ToBase29(prime, p, 32);  
     
     //Adding num1 and num2
     uint8_t sum[32];
@@ -64,7 +70,12 @@ int main()
     FieldMult(n1, n2, result);
     printf("\nMultiplication :\n");  
     printBytes(result, 32);
+
+    fclose(in);
+    return 0;
 }
+
+
 
 
 
