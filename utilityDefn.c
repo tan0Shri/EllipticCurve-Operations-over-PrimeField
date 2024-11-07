@@ -37,7 +37,7 @@ void Reverse(uint8_t *src, uint8_t *dest){
     }
 }
 // Function to convert a number to base 29
-void ToBase29(uint8_t* src, uint32_t* dest, int bytes){
+void ToBase29(uint8_t* src, uint32_t* dest){
     dest[0] = ((uint32_t)src[0] | ((uint32_t)src[1] << 8) | ((uint32_t)src[2] << 16) | ((uint32_t)src[3] << 24)) & mask;
     dest[1] = ((uint32_t)src[3] >> 5) | ((uint32_t)src[4] << 3) | ((uint32_t)src[5] << 11) | ((uint32_t)src[6] << 19) | ((uint32_t)src[7] << 27) & mask;
     dest[2] = ((uint32_t)src[7] >> 2) | ((uint32_t)src[8] << 6) | ((uint32_t)src[9] << 14) | ((uint32_t)src[10] << 22) & mask;
@@ -169,11 +169,9 @@ int IsGreater(uint32_t* num1, uint32_t* num2){
 void FieldAddition(uint32_t* num1, uint32_t* num2, uint8_t* result){
     uint32_t* sum;
     ADD(num1, num2, sum);
-
+    
     uint32_t* p;
-    ToBase29(prime, p, 32);
-    ToBase16(p,prime);
-    printBytes(prime,32);
+    ToBase29(prime, p);
     
     //reduction for to make sum a field element, i.e., if sum is greater than p, return sum-p; else return sum    
     (IsGreater(sum, p) == 1)? SUB(sum,p,sum) : NULL;   //subtraction 'sum-p' is done using 2's complement
@@ -183,13 +181,10 @@ void FieldAddition(uint32_t* num1, uint32_t* num2, uint8_t* result){
 }
 
 void Mult(uint32_t* num1, uint32_t* num2, uint32_t* result){
-    uint64_t mult[17] = {0};    
-    // Perform multiplication  
-    for (int i=16; i>=0; i--){
-        for (int j=8; j>=0; j--){
-            if(i-j >= 0 && i-j < 9){
-                mult[i] += (uint64_t)num1[j] * (uint64_t)num2[i-j];
-            }
+    uint64_t mult[18] = {0};    
+    for(int i=0; i<9; i++){
+        for(int j=0; j<9; j++){
+            mult[i+j] += (uint64_t)num1[i] * (uint64_t)num2[j];
         }
     }
     // Convert to 29-bit representation and handle carry
@@ -202,83 +197,112 @@ void Mult(uint32_t* num1, uint32_t* num2, uint32_t* result){
     result[17] = carry;
 }
 
+void Mult4Barrett(uint32_t* num1, uint32_t* num2, uint32_t* result){
+    uint64_t mult[19] = {0};    
+    // Perform multiplication  
+    for(int i=0; i<10; i++){
+        for(int j=0; j<10; j++){
+            mult[i+j] += (uint64_t)num1[i] * (uint64_t)num2[j];
+        }
+    }
+    // Convert to 29-bit representation and handle carry
+    uint64_t carry = 0;
+    for (int i=0; i<=18; i++){
+        mult[i] += carry;
+        carry = mult[i] >> 29;
+        result[i] = (uint32_t)(mult[i] & mask);
+    }
+    result[19] = carry;
+}
+
 void Barrett_Red(uint32_t* num, uint32_t* p, uint32_t* result){
     
-    uint32_t T[9]= {0}, Q[19] = {0}, temp[19] = {0};
+    uint32_t T[10]= {0}, q2[20] = {0}, temp[20] = {0};
     uint32_t *r1 = {0}, *r2 = {0};
 
-    printf("\nNum: ");
-    for(int i = 17; i>=0; i--){
-        printf("%08x ",num[i]);
-    }
+    // printf("\nNum: ");
+    // for(int i = 17; i>=0; i--){
+    //     printf("%08x ",num[i]);
+    // }
 
-    ToBase29(mu, T, 32);
-    printf("\nT: ");
-    for(int i = 17; i>=0; i--){
-        printf("%08x ",T[i]);
-    }
+    ToBase29(mu, T);
+    // printf("\nT: ");
+    // for(int i = 9; i>=0; i--){
+    //     printf("%08x ",T[i]);
+    // }
 
-    Mult(num+8, T, Q);
-    printf("\nQ: ");
-    for(int i = 17; i>=0; i--){
-        printf("%08x ",Q[i]);
-    }
+    Mult4Barrett(num+8, T, q2);
+    // printf("\nq2: ");
+    // for(int i = 19; i>=0; i--){
+    //     printf("%08x ",q2[i]);
+    // }
 
-    Mult(Q+10, p, temp);
-    printf("\ntemp: ");
-    for(int i = 17; i>=0; i--){
-        printf("%08x ",temp[i]);
-    }
+    Mult4Barrett(q2+10, p, temp);
+    // printf("\ntemp: ");
+    // for(int i = 19; i>=0; i--){
+    //     printf("%08x ",temp[i]);
+    // }
     
     /*for (int i = 0; i < 9; i++){
         r1[i] = num[i+10];
         r2[i] = temp[i+10];
     }*/
-    r1 = num + 10;
-    r2 = temp + 10;
+    // for(int i=0;i<10;i++){
+    //     r1[i] = num[i];
+    //     r2[i] = temp[i];
+    // }
+    r1 = num;
+    r2 = temp;
 
-    printf("\nr1: ");
-    for(int i = 8; i>=0; i--){
-        printf("%08x ",r1[i]);
-    }
+    // printf("\nr1: ");
+    // for(int i = 9; i>=0; i--){
+    //     printf("%08x ",r1[i]);
+    // }
 
-    printf("\nr2: ");
-    for(int i = 8; i>=0; i--){
-        printf("%08x ",r2[i]);
-    }
+    // printf("\nr2: ");
+    // for(int i = 9; i>=0; i--){
+    //     printf("%08x ",r2[i]);
+    // }
     
     SUB(r1, r2, result);
 
-    printf("\nresult: ");
-    for(int i = 8; i>=0; i--){
-        printf("%08x ",result[i]);
-    }
+    // printf("\nresult: ");
+    // for(int i = 9; i>=0; i--){
+    //     printf("%08x ",result[i]);
+    // }
+    
+	(IsGreater(result, p) == 1)? SUB(result, p, result) : NULL;
 
-    if(IsGreater(result,p) == 1){
-        SUB(result, p, result);
-    }
-    if(IsGreater(result,p) == 1){
-        SUB(result, p, result);
-    }
-    
-    
-	// (IsGreater(result, p) == 1)? SUB(result, p, result) : NULL;
+    // printf("\nresult: ");
+    // for(int i = 9; i>=0; i--){
+    //     printf("%08x ",result[i]);
+    // }
+    (IsGreater(result, p) == 1)? SUB(result, p, result) : NULL;
 }
 
 void FieldMult(uint32_t* num1, uint32_t* num2, uint8_t* result){
-    uint32_t temp[18];
+    printf("\n");
+    for(int i=9; i>=0; i--){
+        printf("%08x ",num1[i]);
+    }
+    printf("\n");
+    for(int i=9; i>=0; i--){
+        printf("%08x ",num2[i]);
+    }
+    printf("\n");
+    uint32_t temp[20] = {0};
     // Multiply num1 and num2
     Mult(num1, num2, temp);
     for(int i=17; i>=0; i--){
         printf("%08x ",temp[i]);
     }
-
+    printf("\n");
     //Pack the prime to base 29
-    uint32_t p[9];
+    uint32_t p[10]={0};
     // Convert prime to base 29
-    ToBase29(prime, p, 32);
+    ToBase29(prime, p);
 
-    uint32_t temp1[9];
+    uint32_t temp1[9]={0};
     // Reduce with Barrett
     Barrett_Red(temp, p, temp1);
     // Convert to base 16 and store in result
