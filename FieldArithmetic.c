@@ -9,9 +9,15 @@ uint32_t p[10] = {0};   // prime in base 29
 uint8_t mu[34] = {0};   // mu=(2^(2*29*9))/prime in base 16
 
 //Function to print bytes
-void printBytes(uint8_t* num, int bytes){
-    for(int i = bytes-1; i >= 0; i--){
-        printf("%02x",num[i]);
+void printBytes(uint8_t* num, int bytes) {
+    // Find the index of the first non-zero byte from the most significant side
+    int start = bytes - 1;
+    while (start >= 0 && num[start] == 0) {
+        start--;
+    }
+    // Print bytes from the first non-zero byte to the least significant byte
+    for (int i = start; i >= 0; i--) {
+        printf("%02x", num[i]);
     }
     printf("\n");
 }
@@ -216,13 +222,11 @@ void Barrett_Red(uint32_t* num, uint32_t* p, uint32_t* result){
 }
 
 //Function to multiply numbers in prime field
-void FieldMult(uint32_t* num1, uint32_t* num2, uint8_t* result){
+void FieldMult(uint32_t* num1, uint32_t* num2, uint32_t* result){
     uint32_t temp[20] = {0};    
     Mult(num1, num2, temp); // Multiply num1 and num2
     
     uint32_t temp1[9]={0};    
-    Barrett_Red(temp, p, temp1); // Reduce with Barrett
-
-    // Convert to base 16 and store in result
-    ToBase16(temp1, result);
+    Barrett_Red(temp, p, result); // Reduce with Barrett
 }
+
