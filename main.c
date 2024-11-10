@@ -88,6 +88,14 @@ int main()
     printf("\nRequired result (using montgomery scalar multiplication):\n");
     printBytes(res3, 32);
 
+    //computation of g^exponent (Montgomery Scalar multiplication without BRANCHING)
+    uint32_t exp4[10] = {0};
+    ToBase29(exponent, exp4, 32);
+    uint8_t res4[32] = {0};
+    FieldExp_Montgomery_noBranching(exp4, res4);
+    printf("\nRequired result (using montgomery scalar multiplication WITHOUT BRANCHING):\n");
+    printBytes(res4, 32);
+
     fclose(in);
     return 0;
 }

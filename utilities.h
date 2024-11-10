@@ -11,7 +11,7 @@ extern uint32_t mask; //mask for lower 29-bits
 extern uint8_t prime[32];
 extern uint8_t mu[34];
 extern uint32_t p[10];
-extern uint32_t base[10];
+extern uint32_t g[10];
 
 
 // Function prototypes
@@ -32,6 +32,7 @@ int BitLength(uint32_t* exp);
 void FieldExp_left2right(uint32_t* exponent, uint8_t* result);
 void FieldExp_right2left(uint32_t* exponent, uint8_t* result);
 void FieldExp_Montgomery(uint32_t* exp, uint8_t* result);
+void FieldExp_Montgomery_noBranching(uint32_t* exp, uint8_t* result);
 
 
 
