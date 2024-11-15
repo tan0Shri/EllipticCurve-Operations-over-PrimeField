@@ -19,7 +19,7 @@ int BitLength(uint32_t* exp) {
 }
 
 // Function to perform modular exponentiation in a prime field (left to right square and multiply)
-void FieldExp_left2right(uint32_t* exp, uint8_t* result) {  
+void FieldExp_left2right(uint32_t* exp, uint8_t* result) { 
     // Initialize result to 1 in packed base-29 format
     uint32_t tempResult[10] = {0};
     tempResult[0] = 0x1;
@@ -63,16 +63,6 @@ void FieldExp_right2left(uint32_t* exp, uint8_t* result) {
 
         // Square step
         FieldMult(base, base, base);
-        printf("\ni = %d",i);
-        printf("\ng: ");
-        for(int i=8; i>=0; i--){
-            printf("%08x ",base[i]);
-        }
-        printf("\nh: ");
-        for(int i=8; i>=0; i--){
-            printf("%08x ",tempResult[i]);
-        }
-    printf("\n");
     }
 
     // Convert the result to base 16 for output

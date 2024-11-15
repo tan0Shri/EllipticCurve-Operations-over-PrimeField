@@ -7,6 +7,7 @@ uint32_t mask = 0x1FFFFFFF; // 29-bit mask: 0x1FFFFFFF
 uint8_t prime[32] = {0}; // prime in base 16
 uint32_t p[10] = {0};   // prime in base 29
 uint8_t mu[34] = {0};   // mu=(2^(2*29*9))/prime in base 16
+uint32_t T[10]= {0};
 
 //Function to print bytes
 void printBytes(uint8_t* num, int bytes) {
@@ -130,7 +131,7 @@ void SUB(uint32_t* num1, uint32_t* num2, uint32_t* result){
 		result[i] = num1[i] + (num2[i] ^ mask) + carry;
 		carry = result[i] >> 29;
 		result[i] &= mask;
-	}
+	}    
 }
 
 //To check if num1 is greater than num2 or not
@@ -151,7 +152,7 @@ int IsGreater(uint32_t* num1, uint32_t* num2){
 
 //Function to add numbers in prime field
 void FieldAddition(uint32_t* num1, uint32_t* num2, uint8_t* result){
-    uint32_t sum[10] ={0};
+    uint32_t sum[10] = {0};
     ADD(num1, num2, sum);
     
     //reduction for to make sum a field element, i.e., if sum is greater than p, return sum-p; else return sum    
@@ -159,6 +160,48 @@ void FieldAddition(uint32_t* num1, uint32_t* num2, uint8_t* result){
     
     //Convert packed number back to base 16 for output
     ToBase16(sum, result);
+}
+
+// void FieldSubtraction(uint32_t* num1, uint32_t* num2, uint8_t* result){
+//     uint32_t res[10] = {0};
+//     SUB(num1, num2, res);
+
+//     ADD(res, p, res);
+//     Barrett_Red(res, p, res);
+//     ToBase16(res, result);
+// }
+void FieldSubtraction(uint32_t *num1, uint32_t *num2, uint8_t *result) {
+    uint32_t temp[10] = {0};
+    uint32_t *res = temp;
+    SUB(num1, num2, temp);
+    for(int i= 9; i>=0;i--){
+        printf("%08x ",temp[i]);
+    }
+    printf("\n");
+    for(int i= 9; i>=0;i--){
+        printf("%08x ",p[i]);
+    }
+    printf("\n");
+    if(IsGreater(temp,p)){
+            uint32_t carry = 0;   
+        for (int i = 0; i < 9; i++){
+            temp[i] = temp[i] + p[i] + carry;
+            carry = temp[i] >> 29;
+            temp[i] &= mask; //keep elements with least significant 29 bits
+        }
+        for(int i= 9; i>=0;i--){
+            printf("%08x ",temp[i]);
+        }
+        printf("\n");
+        // Step 3: Perform Barrett reduction to ensure the result < prime
+        
+        Barrett_Red(temp, p, res);
+    }
+    for(int i= 9; i>=0;i--){
+        printf("%08x ",res[i]);
+    }
+    printf("\n");
+    ToBase16(res,result);
 }
 
 //Function to multiply packed numbers in base 29
@@ -202,23 +245,18 @@ void Mult4Barrett(uint32_t* num1, uint32_t* num2, uint32_t* result){
 //Function for Reduction of elements into field using Barrett Reduction algorithm
 void Barrett_Red(uint32_t* num, uint32_t* p, uint32_t* result){
     
-    uint32_t T[10]= {0}, q2[20] = {0}, temp[20] = {0};
-    uint32_t *r1 = {0}, *r2 = {0};
+    uint32_t q2[20] = {0}, temp[20] = {0};
+    uint32_t *r1 = num, *r2 = temp;
 
-    //copying the pre computed 'mu' from file for Barrett reduction
-    for (int i = 33; i >= 0; i--){
-        fscanf(in,"%2hhx",&mu[i]);
-    }  
-    ToBase29(mu, T, 34);
     
     //computations for the Reduction
     Mult4Barrett(num+8, T, q2);
-    Mult4Barrett(q2+10, p, temp);    
-    r1 = num;
-    r2 = temp;
-    SUB(r1, r2, result);
-	(IsGreater(result, p) == 1)? SUB(result, p, result) : NULL;
-    (IsGreater(result, p) == 1)? SUB(result, p, result) : NULL;
+    Mult4Barrett(q2+10, p, temp);   
+    
+    SUB(r1, r2, result);    
+
+	(IsGreater(result, p))? SUB(result, p, result) : NULL;
+    (IsGreater(result, p))? SUB(result, p, result) : NULL;
 }
 
 //Function to multiply numbers in prime field
