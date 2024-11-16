@@ -113,7 +113,6 @@ void FieldExp_Montgomery_noBranching(uint32_t* exp, uint8_t* result) {
         // Temporary variables to hold potential new values for S and R
         uint32_t tempSR[10] = {0};
         uint32_t tempR[10] = {0};
-        uint32_t tempS[10] = {0};
 
         if (bit == 0) {
                 // Swap S and R by copying elements
@@ -127,7 +126,6 @@ void FieldExp_Montgomery_noBranching(uint32_t* exp, uint8_t* result) {
         // Compute S * R and R * R
         FieldMult(S, R, tempSR);  // tempSR = S * R
         FieldMult(R, R, tempR);  // tempR = R * R
-        FieldMult(S, S, tempS);
 
         // Select the new values of S and R without branching
         for (int j = 0; j < 10; j++) {

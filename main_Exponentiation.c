@@ -13,12 +13,14 @@ int main()
         return 1;
     }
 
+    printf("Default Argument for Exponentiation is fixed");
+
     //Exponentiation of primitive element g=2
     uint8_t exponent[32];
     for (int i = 31; i >= 0; i--){
         fscanf(in, "%02hhx",&exponent[i]);
     }
-    printf("\nGiven exponent:\n");
+    printf("\nGiven exponent for exponentiation:\n");
     printBytes(exponent, 32);
 
     //computation of g^exponent (left 2 right)

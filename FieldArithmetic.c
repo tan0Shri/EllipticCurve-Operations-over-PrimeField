@@ -152,7 +152,8 @@ void ADD(uint32_t* num1, uint32_t* num2, uint32_t* sum){
     uint32_t carry = 0;   
     for (int i = 0; i < 9; i++){
         sum[i] = num1[i] + num2[i] + carry;
-        carry = (i == 8)? (sum[i] >> 24) : (sum[i] >> 29);
+        //carry = (i == 8)? (sum[i] >> 24) : (sum[i] >> 29);
+        carry = sum[i] >> 29;
         sum[i] &= mask; //keep elements with least significant 29 bits
     }
 }
@@ -203,9 +204,30 @@ void FieldAddition(uint32_t* num1, uint32_t* num2, uint8_t* result){
 //     ToBase16(res, result);
 // }
 void FieldSubtraction(uint32_t *num1, uint32_t *num2, uint8_t *result) {
-    uint32_t temp[10] = {0};
+    for(int i= 9; i>=0;i--){
+        printf("%08x ",num1[i]);
+    }
+    printf("\n");
+    for(int i= 9; i>=0;i--){
+        printf("%08x ",num2[i]);
+    }
+    printf("\n");
+    uint32_t temp[20] = {0};
     uint32_t *res = temp;
-    SUB(num1, num2, temp);
+    //SUB(num1, num2, temp);
+uint32_t borrow = 0;
+
+    for (int i = 0; i < 9; i++) {
+        uint64_t t = (uint64_t)num1[i] - num2[i] - borrow;
+        if (t > (2^29-1)) {
+            borrow = 1; // Borrow occurs
+            temp[i] = (uint32_t)(t + ((uint64_t)1 << 29)); // Adjust with 2^32
+        } else {
+            borrow = 0;
+            temp[i] = (uint32_t)t;
+        }
+    }
+
     for(int i= 9; i>=0;i--){
         printf("%08x ",temp[i]);
     }
@@ -214,21 +236,15 @@ void FieldSubtraction(uint32_t *num1, uint32_t *num2, uint8_t *result) {
         printf("%08x ",p[i]);
     }
     printf("\n");
-    if(IsGreater(temp,p)){
-            uint32_t carry = 0;   
-        for (int i = 0; i < 9; i++){
-            temp[i] = temp[i] + p[i] + carry;
-            carry = temp[i] >> 29;
-            temp[i] &= mask; //keep elements with least significant 29 bits
-        }
-        for(int i= 9; i>=0;i--){
-            printf("%08x ",temp[i]);
-        }
-        printf("\n");
-        // Step 3: Perform Barrett reduction to ensure the result < prime
-        
-        Barrett_Red(temp, p, res);
+     
+    ADD(temp, p, temp);
+    for(int i= 9; i>=0;i--){
+        printf("%08x ",temp[i]);
     }
+    printf("\n");
+    // Step 3: Perform Barrett reduction to ensure the result < prime
+        
+    Barrett_Red(temp, p, res);
     for(int i= 9; i>=0;i--){
         printf("%08x ",res[i]);
     }
@@ -275,11 +291,9 @@ void Mult4Barrett(uint32_t* num1, uint32_t* num2, uint32_t* result){
 }
 
 //Function for Reduction of elements into field using Barrett Reduction algorithm
-void Barrett_Red(uint32_t* num, uint32_t* p, uint32_t* result){
-    
+void Barrett_Red(uint32_t* num, uint32_t* p, uint32_t* result){    
     uint32_t q2[20] = {0}, temp[20] = {0};
     uint32_t *r1 = num, *r2 = temp;
-
     
     //computations for the Reduction
     Mult4Barrett(num+8, T, q2);
