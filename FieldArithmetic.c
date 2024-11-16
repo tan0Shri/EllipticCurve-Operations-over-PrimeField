@@ -1,13 +1,46 @@
 #include<stdio.h>
+#include <string.h>
+#include<stdlib.h>
 #include "utilities.h"
-
-FILE* in;
 
 uint32_t mask = 0x1FFFFFFF; // 29-bit mask: 0x1FFFFFFF
 uint8_t prime[32] = {0}; // prime in base 16
 uint32_t p[10] = {0};   // prime in base 29
 uint8_t mu[34] = {0};   // mu=(2^(2*29*9))/prime in base 16
-uint32_t T[10]= {0};
+uint32_t T[10]= {0};    // mu in base 29
+
+void PrimeInputs(){
+    // Opening input file for prime related input
+    FILE* input = fopen("prime_mu.txt", "r");
+    if (input == NULL) {
+        perror("Error opening file for prime related inputs");
+        exit(EXIT_FAILURE);
+    }
+    //copying the given prime from the file
+    for (int i = 31; i >= 0; i--){
+        fscanf(input,"%2hhx",&prime[i]);
+    }    
+    //convert given prime to base 29
+    ToBase29(prime, p, 32);  
+
+    //copying the pre computed 'mu' from file for Barrett reduction
+    for (int i = 33; i >= 0; i--){
+        fscanf(input,"%2hhx",&mu[i]);
+    }  
+    //convert given mu to base 29
+    ToBase29(mu, T, 34);
+
+    fclose(input);
+}
+
+// void StringToArray(const char *hexstring, uint8_t *dest){
+//     mu4Barrett = hexstring;
+//     int length = strlen(hexstring);
+
+//      for (int i = 0; i < 34; i++) {
+//         sscanf(hexstring + 2 * i, "%2hhx", &mu[33-i]);
+//     }
+// }
 
 //Function to print bytes
 void printBytes(uint8_t* num, int bytes) {
@@ -165,7 +198,6 @@ void FieldAddition(uint32_t* num1, uint32_t* num2, uint8_t* result){
 // void FieldSubtraction(uint32_t* num1, uint32_t* num2, uint8_t* result){
 //     uint32_t res[10] = {0};
 //     SUB(num1, num2, res);
-
 //     ADD(res, p, res);
 //     Barrett_Red(res, p, res);
 //     ToBase16(res, result);
