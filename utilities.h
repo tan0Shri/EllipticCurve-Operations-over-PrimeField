@@ -1,10 +1,8 @@
 #ifndef UTILITIES_H   // Header guard to avoid multiple inclusion
 #define UTILITIES_H
 
-#include<stdio.h>
 #include<stdint.h>
 
-extern FILE* in;
 extern uint32_t mask; //mask for lower 29-bits
 
 //declaration of global array for prime and mu(for Barrett)
@@ -16,6 +14,8 @@ extern uint32_t g[10];
 
 
 // Function prototypes
+void PrimeInputs();
+void StringToArray(const char *hexstring, uint8_t *dest);
 void printBytes(uint8_t* num, int bytes);     // Prints byte array
 void ToBase29(uint8_t* src, uint32_t* dest, int bytes); // Converts data to base 29
 void ToBase16(uint32_t* src, uint8_t* dest); // Converts data to base 16 (hexadecimal)
