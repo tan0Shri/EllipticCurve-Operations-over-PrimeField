@@ -9,6 +9,7 @@ uint32_t p[10] = {0};   // prime in base 29
 uint8_t mu[34] = {0};   // mu=(2^(2*29*9))/prime in base 16
 uint32_t T[10]= {0};    // mu in base 29
 
+//Function for scanning the inputes related to prime-Field from file
 void PrimeInputs(){
     // Opening input file for prime related input
     FILE* input = fopen("prime_mu.txt", "r");
@@ -33,14 +34,13 @@ void PrimeInputs(){
     fclose(input);
 }
 
-// void StringToArray(const char *hexstring, uint8_t *dest){
-//     mu4Barrett = hexstring;
-//     int length = strlen(hexstring);
+void StringToArray(const char *hexstring, uint8_t *dest){
+    int length = strlen(hexstring);
 
-//      for (int i = 0; i < 34; i++) {
-//         sscanf(hexstring + 2 * i, "%2hhx", &mu[33-i]);
-//     }
-// }
+     for (int i = 0; i < 32; i++) {
+        sscanf(hexstring + 2 * i, "%2hhx", &dest[31-i]);
+    }
+}
 
 //Function to print bytes
 void printBytes(uint8_t* num, int bytes) {
@@ -49,6 +49,7 @@ void printBytes(uint8_t* num, int bytes) {
     while (start >= 0 && num[start] == 0) {
         start--;
     }
+    printf("0x");
     // Print bytes from the first non-zero byte to the least significant byte
     for (int i = start; i >= 0; i--) {
         printf("%02x", num[i]);
@@ -148,23 +149,43 @@ void ToBase16(uint32_t* src, uint8_t* dest){
 }
 
 //Function to add packed numbers in base 29
-void ADD(uint32_t* num1, uint32_t* num2, uint32_t* sum){ 
+void ADD(uint32_t* num1, uint32_t* num2, uint32_t* sum, int ACTIVE_COUNT){ 
     uint32_t carry = 0;   
-    for (int i = 0; i < 9; i++){
+    for (int i = 0; i < ACTIVE_COUNT; i++){
         sum[i] = num1[i] + num2[i] + carry;
-        carry = (i == 8)? (sum[i] >> 24) : (sum[i] >> 29);
+        //carry = (i == 8)? (sum[i] >> 24) : (sum[i] >> 29);
+        carry = sum[i] >> 29;
         sum[i] &= mask; //keep elements with least significant 29 bits
     }
 }
 
 //Function to subtract packed numbers in base 29 using 2's complement
-void SUB(uint32_t* num1, uint32_t* num2, uint32_t* result){
+void SUB(uint32_t* num1, uint32_t* num2, uint32_t* result, int ACTIVE_COUNT){
 	uint32_t carry = 1;
-	for (int i=0; i < 10; i++){
+	for (int i=0; i < ACTIVE_COUNT; i++){
 		result[i] = num1[i] + (num2[i] ^ mask) + carry;
 		carry = result[i] >> 29;
 		result[i] &= mask;
 	}    
+}
+
+//Function to multiply packed numbers in base 29
+void Mult(uint32_t* num1, uint32_t* num2, uint32_t* result, int ACTIVE_COUNT){
+    uint64_t mult[20] = {0};  
+    // Perform multiplication  
+    for(int i = 0; i < ACTIVE_COUNT; i++){
+        for(int j = 0; j < ACTIVE_COUNT; j++){
+            mult[i+j] += (uint64_t)num1[i] * (uint64_t)num2[j];
+        }
+    }
+    // Convert to 29-bit representation and handle carry
+    uint64_t carry = 0;
+    for (int i = 0; i <= 2*(ACTIVE_COUNT -1); i++){
+        mult[i] += carry;
+        carry = mult[i] >> 29;
+        result[i] = (uint32_t)(mult[i] & mask);
+    }
+    result[2*ACTIVE_COUNT - 1] = carry;
 }
 
 //To check if num1 is greater than num2 or not
@@ -184,119 +205,77 @@ int IsGreater(uint32_t* num1, uint32_t* num2){
 }
 
 //Function to add numbers in prime field
-void FieldAddition(uint32_t* num1, uint32_t* num2, uint8_t* result){
-    uint32_t sum[10] = {0};
-    ADD(num1, num2, sum);
+void FieldAddition(uint32_t* num1, uint32_t* num2, uint32_t* sum){
+
+    ADD(num1, num2, sum, 9);
     
     //reduction for to make sum a field element, i.e., if sum is greater than p, return sum-p; else return sum    
-    (IsGreater(sum, p) == 1)? SUB(sum,p,sum) : NULL;   //subtraction 'sum-p' is done using 2's complement
+    (IsGreater(sum, p) == 1)? SUB(sum, p, sum, 9) : NULL;   //subtraction 'sum-p' is done using 2's complement
     
-    //Convert packed number back to base 16 for output
-    ToBase16(sum, result);
 }
+void FieldSubtraction(uint32_t *num1, uint32_t *num2, uint32_t *sub) {
+    uint32_t result[20] = {0};
+    // Perform modular subtraction num1 - num2 and store the result in 'res'
+    SUB(num1, num2, result, 9);
 
-// void FieldSubtraction(uint32_t* num1, uint32_t* num2, uint8_t* result){
-//     uint32_t res[10] = {0};
-//     SUB(num1, num2, res);
-//     ADD(res, p, res);
-//     Barrett_Red(res, p, res);
-//     ToBase16(res, result);
-// }
-void FieldSubtraction(uint32_t *num1, uint32_t *num2, uint8_t *result) {
-    uint32_t temp[10] = {0};
-    uint32_t *res = temp;
-    SUB(num1, num2, temp);
-    for(int i= 9; i>=0;i--){
-        printf("%08x ",temp[i]);
-    }
-    printf("\n");
-    for(int i= 9; i>=0;i--){
-        printf("%08x ",p[i]);
-    }
-    printf("\n");
-    if(IsGreater(temp,p)){
-            uint32_t carry = 0;   
-        for (int i = 0; i < 9; i++){
-            temp[i] = temp[i] + p[i] + carry;
-            carry = temp[i] >> 29;
-            temp[i] &= mask; //keep elements with least significant 29 bits
-        }
-        for(int i= 9; i>=0;i--){
-            printf("%08x ",temp[i]);
-        }
-        printf("\n");
-        // Step 3: Perform Barrett reduction to ensure the result < prime
-        
-        Barrett_Red(temp, p, res);
-    }
-    for(int i= 9; i>=0;i--){
-        printf("%08x ",res[i]);
-    }
-    printf("\n");
-    ToBase16(res,result);
-}
+    // Add the prime modulus 'p' to ensure the result is non-negative
+    ADD(result, p, result, 9);
 
-//Function to multiply packed numbers in base 29
-void Mult(uint32_t* num1, uint32_t* num2, uint32_t* result){
-    uint64_t mult[18] = {0};  
-    // Perform multiplication  
-    for(int i=0; i<9; i++){
-        for(int j=0; j<9; j++){
-            mult[i+j] += (uint64_t)num1[i] * (uint64_t)num2[j];
-        }
-    }
-    // Convert to 29-bit representation and handle carry
-    uint64_t carry = 0;
-    for (int i=0; i<=16; i++){
-        mult[i] += carry;
-        carry = mult[i] >> 29;
-        result[i] = (uint32_t)(mult[i] & mask);
-    }
-    result[17] = carry;
-}
+    // Perform Barrett Reduction to ensure the result is within the field range (res < p)
+    Barrett_Red(result, p, result);
 
-//Function to multiply packed numbers in base 29 (particularly for Barrett)
-void Mult4Barrett(uint32_t* num1, uint32_t* num2, uint32_t* result){
-    uint64_t mult[19] = {0};    
-    // Perform multiplication  
-    for(int i=0; i<10; i++){
-        for(int j=0; j<10; j++){
-            mult[i+j] += (uint64_t)num1[i] * (uint64_t)num2[j];
-        }
+    for(int i = 0; i < 9; i++){
+        sub[i] = result[i];
     }
-    // Convert to 29-bit representation and handle carry
-    uint64_t carry = 0;
-    for (int i=0; i<=18; i++){
-        mult[i] += carry;
-        carry = mult[i] >> 29;
-        result[i] = (uint32_t)(mult[i] & mask);
-    }
-    result[19] = carry;
 }
 
 //Function for Reduction of elements into field using Barrett Reduction algorithm
-void Barrett_Red(uint32_t* num, uint32_t* p, uint32_t* result){
-    
+void Barrett_Red(uint32_t* num, uint32_t* p, uint32_t* result){    
     uint32_t q2[20] = {0}, temp[20] = {0};
     uint32_t *r1 = num, *r2 = temp;
-
     
     //computations for the Reduction
-    Mult4Barrett(num+8, T, q2);
-    Mult4Barrett(q2+10, p, temp);   
+    Mult(num+8, T, q2, 10);
+    Mult(q2+10, p, temp, 10);   
     
-    SUB(r1, r2, result);    
+    SUB(r1, r2, result, 10);    
 
-	(IsGreater(result, p))? SUB(result, p, result) : NULL;
-    (IsGreater(result, p))? SUB(result, p, result) : NULL;
+	(IsGreater(result, p))? SUB(result, p, result, 10) : NULL;
+    (IsGreater(result, p))? SUB(result, p, result, 10) : NULL;
 }
 
 //Function to multiply numbers in prime field
 void FieldMult(uint32_t* num1, uint32_t* num2, uint32_t* result){
     uint32_t temp[20] = {0};    
-    Mult(num1, num2, temp); // Multiply num1 and num2
+    Mult(num1, num2, temp, 9); // Multiply num1 and num2
     
     uint32_t temp1[9]={0};    
     Barrett_Red(temp, p, result); // Reduce with Barrett
 }
+
+// Function to compute modular inverse of num in prime field using Fermat's Little Theorem
+void FieldInverse(uint32_t* num, uint32_t* result) {
+    uint32_t exp[10] = {0};  // Exponent (p-2)
+    
+    // Calculate the exponent p-2
+    for (int i = 0; i < 9; i++) {
+        exp[i] = p[i];
+    }
+    
+    exp[0] -= 2;  // Subtract 2 from p for exponentiation
+
+    FieldExp_Montgomery_noBranching(num, exp, result);  // Compute num^(p-2) mod p to get the inverse
+}
+
+// Function to divide num1 by num2 in prime field (i.e., (num1 * num2^-1) mod p)
+void FieldDivision(uint32_t* num1, uint32_t* num2, uint32_t* result) {
+    uint32_t inverse[10] = {0};  // To store the inverse of num2
+
+    // Compute the inverse of num2
+    FieldInverse(num2, inverse);
+
+    // Perform multiplication with the inverse of num2
+    FieldMult(num1, inverse, result);
+}
+
 

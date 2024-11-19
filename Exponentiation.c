@@ -19,13 +19,10 @@ int BitLength(uint32_t* exp) {
 }
 
 // Function to perform modular exponentiation in a prime field (left to right square and multiply)
-void FieldExp_left2right(uint32_t* exp, uint8_t* result) { 
+void FieldExp_left2right(uint32_t* base, uint32_t* exp, uint8_t* result) { 
     // Initialize result to 1 in packed base-29 format
     uint32_t tempResult[10] = {0};
     tempResult[0] = 0x1;
-
-    uint32_t base[10] = {0};
-    *base = *g;
 
     // Get the bit length of the exponent
     int expBitLength = BitLength(exp);
@@ -44,10 +41,12 @@ void FieldExp_left2right(uint32_t* exp, uint8_t* result) {
 }
 
 // Function to perform modular exponentiation in a prime field (right to left square and multiply)
-void FieldExp_right2left(uint32_t* exp, uint8_t* result) { 
+void FieldExp_right2left(uint32_t* base, uint32_t* exp, uint8_t* result) { 
     //copy base from g
-    uint32_t base[10] = {0};
-    *base = *g;
+    uint32_t b[10] = {0};
+    for(int i = 0; i < 9; i++){
+        b[i] = base[i];
+    }
 
     // Initialize result to 1 in packed base-29 format
     uint32_t tempResult[10] = {0x1, 0};
@@ -59,20 +58,23 @@ void FieldExp_right2left(uint32_t* exp, uint8_t* result) {
     for (int i = 0; i < expBitLength; i++) 
     {
         // Multiply step if the i-th bit of exp is set 
-        ((exp[i / 29] >> (i % 29)) & 1)? FieldMult(tempResult, base, tempResult) : NULL;
+        ((exp[i / 29] >> (i % 29)) & 1)? FieldMult(tempResult, b, tempResult) : NULL;
 
         // Square step
-        FieldMult(base, base, base);
+        FieldMult(b, b, b);
     }
 
     // Convert the result to base 16 for output
     ToBase16(tempResult, result);
 }
 
-void FieldExp_Montgomery(uint32_t* exp, uint8_t* result) { 
+void FieldExp_Montgomery(uint32_t* base, uint32_t* exp, uint8_t* result) { 
     // Initialize S to 1 and R to base in packed base-29 format
     uint32_t S[10] = {0};
-    *S = *g;  // S represents the current result, initialized to base
+    // S represents the current result, initialized to base
+    for(int i = 0; i < 9; i++){
+        S[i] = base[i];
+    }
     uint32_t R[10] = {0};       // R represents the "next" result 
     FieldMult(S, S, R);   // initialized to the base^2
 
@@ -98,9 +100,12 @@ void FieldExp_Montgomery(uint32_t* exp, uint8_t* result) {
     ToBase16(S, result);
 }
 
-void FieldExp_Montgomery_noBranching(uint32_t* exp, uint8_t* result) { 
+void FieldExp_Montgomery_noBranching(uint32_t* base, uint32_t* exp, uint32_t* result) { 
     uint32_t S[10] = {0};
-    *S = *g; // S is initialized to base
+    // S is initialized to base
+    for(int i = 0; i < 9; i++){
+        S[i] = base[i];
+    }
     uint32_t R[10] = {0}; // R initialized to base^2
     FieldMult(S, S, R);
 
@@ -113,7 +118,6 @@ void FieldExp_Montgomery_noBranching(uint32_t* exp, uint8_t* result) {
         // Temporary variables to hold potential new values for S and R
         uint32_t tempSR[10] = {0};
         uint32_t tempR[10] = {0};
-        uint32_t tempS[10] = {0};
 
         if (bit == 0) {
                 // Swap S and R by copying elements
@@ -127,7 +131,6 @@ void FieldExp_Montgomery_noBranching(uint32_t* exp, uint8_t* result) {
         // Compute S * R and R * R
         FieldMult(S, R, tempSR);  // tempSR = S * R
         FieldMult(R, R, tempR);  // tempR = R * R
-        FieldMult(S, S, tempS);
 
         // Select the new values of S and R without branching
         for (int j = 0; j < 10; j++) {
@@ -135,8 +138,10 @@ void FieldExp_Montgomery_noBranching(uint32_t* exp, uint8_t* result) {
             R[j] = (bit * tempR[j]) + ((1 - bit) * tempSR[j]);
         }
     }
-    // Convert S to base 16 for output
-    ToBase16(S, result);
+    // Copy S to result
+    for(int i = 0; i < 9; i++){
+        result[i] = S[i];
+    }
 }
 
 
