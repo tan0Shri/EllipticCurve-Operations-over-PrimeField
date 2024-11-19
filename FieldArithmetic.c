@@ -278,4 +278,3 @@ void FieldDivision(uint32_t* num1, uint32_t* num2, uint32_t* result) {
     FieldMult(num1, inverse, result);
 }
 
-

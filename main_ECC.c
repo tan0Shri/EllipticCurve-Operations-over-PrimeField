@@ -1,5 +1,6 @@
 #include<stdio.h>
 #include "utilities.h"
+#include "ecc_utilities.h"
 
 int main()
 {
@@ -7,54 +8,76 @@ int main()
     PrimeInputs();
 
     // Opening input file
-    FILE *in = fopen("input.txt", "r");
+    FILE *in = fopen("ecc_inputs.txt", "r");
     if (in == NULL) {
         perror("Error opening file");
         return 1;
     }
         
-    uint8_t num1[32];
+    uint8_t x1[32];
     for (int i = 31; i >= 0; i--){
-        fscanf(in, "%02hhx",&num1[i]);
+        fscanf(in, "%02hhx",&x1[i]);
     }
-
-    uint8_t num2[32];
+    uint8_t y1[32];
     for (int i = 31; i >= 0; i--){
-        fscanf(in, "%02hhx",&num2[i]);
+        fscanf(in, "%02hhx",&y1[i]);
     }
+    printf("Given first points:\n");
+    printf("x1 : ");
+    printBytes(x1,32);
+    printf("y1 : ");
+    printBytes(y1,32);
 
-    printf("Two numbers given:\n");
-    printBytes(num1,32);
-    printBytes(num2,32);
+    uint8_t x2[32];
+    for (int i = 31; i >= 0; i--){
+        fscanf(in, "%02hhx",&x2[i]);
+    }
+    uint8_t y2[32];
+    for (int i = 31; i >= 0; i--){
+        fscanf(in, "%02hhx",&y2[i]);
+    }
+    printf("Given 2nd points:\n");
+    printf("x2 : ");
+    printBytes(x2,32);
+    printf("y2 : ");
+    printBytes(y2,32);
 
-    //Convert num1 into base 29
-    uint32_t n1[10] ={0};
-    ToBase29(num1, n1, 32); 
+    //Convert x1, y1 into base 29
+    uint32_t x1_29[10] ={0};
+    ToBase29(x1, x1_29, 32); 
+    uint32_t y1_29[10] ={0};
+    ToBase29(y1, y1_29, 32);
     
-    //Convert num2 into base 29
-    uint32_t n2[10] ={0};
-    ToBase29(num2, n2, 32);
+    //Convert x2, y2 into base 29
+    uint32_t x2_29[10] ={0};
+    ToBase29(x2, x2_29, 32); 
+    uint32_t y2_29[10] ={0};
+    ToBase29(y2, y2_29, 32);
 
-    //Adding num1 and num2
-    uint8_t sum[32];
-    FieldAddition(n1, n2, sum);  
-    printf("\nSum : ");  
-    printBytes(sum, 32);
+    //point addition : (x1,y1)+(x2,y2)
+    uint32_t x3_29[10], y3_29[10];
+    add(x1_29, y1_29, x2_29, y2_29, x3_29, y3_29);
+    uint8_t x3[32], y3[32];
+    ToBase16(x3_29, x3);
+    ToBase16(y3_29, y3);
+    printf("\naddition results (x1,y1) + (x2,y2) :\n");
+    printf("x3 : ");
+    printBytes(x3, 32);
+    printf("y3 : ");
+    printBytes(y3, 32);
 
-    //subtracting num1 and num2
-    uint8_t sub[32];
-    FieldSubtraction(n1, n2, sub);  
-    printf("Sub : ");  
-    printBytes(sub, 32);
-
-    //Multiplying num1 and num2
-    uint32_t mult_base29[10];
-    FieldMult(n1, n2, mult_base29);
-    printf("Mult: ");   
-    uint8_t mult[32];
-    ToBase16(mult_base29, mult);
-    printBytes(mult, 32);
-
+    // dbl of (x1, y1)
+    uint32_t x4_29[10], y4_29[10];
+    dbl(x1_29, y1_29, x4_29, y4_29);
+    uint8_t x4[32], y4[32];
+    ToBase16(x4_29, x4);
+    ToBase16(y4_29, y4);
+    printf("\ndoubling results (x1,y1)^2 :\n");
+    printf("x4 : ");
+    printBytes(x4, 32);
+    printf("y4 : ");
+    printBytes(y4, 32);
+    
     fclose(in);
     return 0;
 }
