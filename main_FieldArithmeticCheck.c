@@ -38,19 +38,19 @@ int main()
     //Adding num1 and num2
     uint8_t sum[32];
     FieldAddition(n1, n2, sum);  
-    printf("\nSum :\n");  
+    printf("\nSum : ");  
     printBytes(sum, 32);
 
     //subtracting num1 and num2
     uint8_t sub[32];
     FieldSubtraction(n1, n2, sub);  
-    printf("\nSub :\n");  
+    printf("Sub : ");  
     printBytes(sub, 32);
 
     //Multiplying num1 and num2
     uint32_t mult_base29[10];
     FieldMult(n1, n2, mult_base29);
-    printf("\nMultiplication :\n");   
+    printf("Mult: ");   
     uint8_t mult[32];
     ToBase16(mult_base29, mult);
     printBytes(mult, 32);
