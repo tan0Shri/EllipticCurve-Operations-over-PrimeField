@@ -28,7 +28,8 @@ void FieldAddition(uint32_t* num1, uint32_t* num2, uint32_t* result);    //Perfo
 void FieldSubtraction(uint32_t* num1, uint32_t* num2, uint32_t* result);
 void Barrett_Red(uint32_t* num, uint32_t* p, uint32_t* result); //reduction algorithm for reducing larger elements into field elements
 void FieldMult(uint32_t* num1, uint32_t* num2, uint32_t* result); //performs field multiplication (with reduction)
-void FieldInverse(uint32_t* num, uint8_t* result);
+void FieldInverse(uint32_t* num, uint32_t* result);
+void FieldDivision(uint32_t* num1, uint32_t* num2, uint32_t* result);
 
 
 
@@ -36,7 +37,7 @@ int BitLength(uint32_t* exp);
 void FieldExp_left2right(uint32_t* base, uint32_t* exponent, uint8_t* result);
 void FieldExp_right2left(uint32_t* base, uint32_t* exponent, uint8_t* result);
 void FieldExp_Montgomery(uint32_t* base, uint32_t* exp, uint8_t* result);
-void FieldExp_Montgomery_noBranching(uint32_t* base, uint32_t* exp, uint8_t* result);
+void FieldExp_Montgomery_noBranching(uint32_t* base, uint32_t* exp, uint32_t* result);
 
 
 

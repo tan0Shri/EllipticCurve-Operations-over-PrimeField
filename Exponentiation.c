@@ -44,7 +44,9 @@ void FieldExp_left2right(uint32_t* base, uint32_t* exp, uint8_t* result) {
 void FieldExp_right2left(uint32_t* base, uint32_t* exp, uint8_t* result) { 
     //copy base from g
     uint32_t b[10] = {0};
-    *b = *base;
+    for(int i = 0; i < 9; i++){
+        b[i] = base[i];
+    }
 
     // Initialize result to 1 in packed base-29 format
     uint32_t tempResult[10] = {0x1, 0};
@@ -69,7 +71,10 @@ void FieldExp_right2left(uint32_t* base, uint32_t* exp, uint8_t* result) {
 void FieldExp_Montgomery(uint32_t* base, uint32_t* exp, uint8_t* result) { 
     // Initialize S to 1 and R to base in packed base-29 format
     uint32_t S[10] = {0};
-    *S = *base;  // S represents the current result, initialized to base
+    // S represents the current result, initialized to base
+    for(int i = 0; i < 9; i++){
+        S[i] = base[i];
+    }
     uint32_t R[10] = {0};       // R represents the "next" result 
     FieldMult(S, S, R);   // initialized to the base^2
 
@@ -95,9 +100,12 @@ void FieldExp_Montgomery(uint32_t* base, uint32_t* exp, uint8_t* result) {
     ToBase16(S, result);
 }
 
-void FieldExp_Montgomery_noBranching(uint32_t* base, uint32_t* exp, uint8_t* result) { 
+void FieldExp_Montgomery_noBranching(uint32_t* base, uint32_t* exp, uint32_t* result) { 
     uint32_t S[10] = {0};
-    *S = *base; // S is initialized to base
+    // S is initialized to base
+    for(int i = 0; i < 9; i++){
+        S[i] = base[i];
+    }
     uint32_t R[10] = {0}; // R initialized to base^2
     FieldMult(S, S, R);
 
@@ -130,8 +138,10 @@ void FieldExp_Montgomery_noBranching(uint32_t* base, uint32_t* exp, uint8_t* res
             R[j] = (bit * tempR[j]) + ((1 - bit) * tempSR[j]);
         }
     }
-    // Convert S to base 16 for output
-    ToBase16(S, result);
+    // Copy S to result
+    for(int i = 0; i < 9; i++){
+        result[i] = S[i];
+    }
 }
 
 

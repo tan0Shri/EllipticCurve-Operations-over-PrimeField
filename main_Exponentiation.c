@@ -23,35 +23,31 @@ int main()
     printf("\nGiven exponent for exponentiation:\n");
     printBytes(exponent, 32);
 
+    // Converting the exponent to base 29
+    uint32_t exp[10] = {0};
+    ToBase29(exponent, exp, 32);
+
     //computation of g^exponent (left 2 right)
-    uint32_t exp1[10] = {0};
-    ToBase29(exponent, exp1, 32);
     uint8_t res1[32] = {0};
-    FieldExp_left2right(g, exp1, res1);
+    FieldExp_left2right(g, exp, res1);
     printf("\nRequired result (using left-to-right square and multiply algorithm):\n");
     printBytes(res1, 32);
 
     //computation of g^exponent (right 2 left)
-    uint32_t exp2[10] = {0};
-    ToBase29(exponent, exp2, 32);
     uint8_t res2[32] = {0};
-    FieldExp_right2left(g, exp2, res2);
+    FieldExp_right2left(g, exp, res2);
     printf("\nRequired result (using right-to_left square and multiply algorithm):\n");
     printBytes(res2, 32);
 
     //computation of g^exponent (Montgomery Scalar multiplication)
-    uint32_t exp3[10] = {0};
-    ToBase29(exponent, exp3, 32);
     uint8_t res3[32] = {0};
-    FieldExp_Montgomery(g, exp3, res3);
+    FieldExp_Montgomery(g, exp, res3);
     printf("\nRequired result (using montgomery scalar multiplication):\n");
     printBytes(res3, 32);
 
     //computation of g^exponent (Montgomery Scalar multiplication without BRANCHING)
-    uint32_t exp4[10] = {0};
-    ToBase29(exponent, exp4, 32);
     uint8_t res4[32] = {0};
-    FieldExp_Montgomery_noBranching(g, exp4, res4);
+    FieldExp_Montgomery_noBranching(g, exp, res4);
     printf("\nRequired result (using montgomery scalar multiplication WITHOUT BRANCHING):\n");
     printBytes(res4, 32);
 

@@ -34,14 +34,13 @@ void PrimeInputs(){
     fclose(input);
 }
 
-// void StringToArray(const char *hexstring, uint8_t *dest){
-//     mu4Barrett = hexstring;
-//     int length = strlen(hexstring);
+void StringToArray(const char *hexstring, uint8_t *dest){
+    int length = strlen(hexstring);
 
-//      for (int i = 0; i < 34; i++) {
-//         sscanf(hexstring + 2 * i, "%2hhx", &mu[33-i]);
-//     }
-// }
+     for (int i = 0; i < 32; i++) {
+        sscanf(hexstring + 2 * i, "%2hhx", &dest[31-i]);
+    }
+}
 
 //Function to print bytes
 void printBytes(uint8_t* num, int bytes) {
@@ -255,15 +254,28 @@ void FieldMult(uint32_t* num1, uint32_t* num2, uint32_t* result){
 }
 
 // Function to compute modular inverse of num in prime field using Fermat's Little Theorem
-void FieldInverse(uint32_t* num, uint8_t* result) {
+void FieldInverse(uint32_t* num, uint32_t* result) {
     uint32_t exp[10] = {0};  // Exponent (p-2)
     
     // Calculate the exponent p-2
     for (int i = 0; i < 9; i++) {
         exp[i] = p[i];
     }
+    
     exp[0] -= 2;  // Subtract 2 from p for exponentiation
 
     FieldExp_Montgomery_noBranching(num, exp, result);  // Compute num^(p-2) mod p to get the inverse
 }
+
+// Function to divide num1 by num2 in prime field (i.e., (num1 * num2^-1) mod p)
+void FieldDivision(uint32_t* num1, uint32_t* num2, uint32_t* result) {
+    uint32_t inverse[10] = {0};  // To store the inverse of num2
+
+    // Compute the inverse of num2
+    FieldInverse(num2, inverse);
+
+    // Perform multiplication with the inverse of num2
+    FieldMult(num1, inverse, result);
+}
+
 
