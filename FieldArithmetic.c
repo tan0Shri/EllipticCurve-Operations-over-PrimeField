@@ -206,29 +206,28 @@ int IsGreater(uint32_t* num1, uint32_t* num2){
 }
 
 //Function to add numbers in prime field
-void FieldAddition(uint32_t* num1, uint32_t* num2, uint8_t* result){
-    uint32_t sum[10] = {0};
+void FieldAddition(uint32_t* num1, uint32_t* num2, uint32_t* sum){
+
     ADD(num1, num2, sum, 9);
     
     //reduction for to make sum a field element, i.e., if sum is greater than p, return sum-p; else return sum    
     (IsGreater(sum, p) == 1)? SUB(sum, p, sum, 9) : NULL;   //subtraction 'sum-p' is done using 2's complement
     
-    //Convert packed number back to base 16 for output
-    ToBase16(sum, result);
 }
-void FieldSubtraction(uint32_t *num1, uint32_t *num2, uint8_t *result) {
-    uint32_t res[20] = {0};  
+void FieldSubtraction(uint32_t *num1, uint32_t *num2, uint32_t *sub) {
+    uint32_t result[20] = {0};
     // Perform modular subtraction num1 - num2 and store the result in 'res'
-    SUB(num1, num2, res, 9);
+    SUB(num1, num2, result, 9);
 
     // Add the prime modulus 'p' to ensure the result is non-negative
-    ADD(res, p, res, 9);
+    ADD(result, p, result, 9);
 
     // Perform Barrett Reduction to ensure the result is within the field range (res < p)
-    Barrett_Red(res, p, res);
+    Barrett_Red(result, p, result);
 
-    // Convert the result from numerical representation to Base16 for output
-    ToBase16(res, result);
+    for(int i = 0; i < 9; i++){
+        sub[i] = result[i];
+    }
 }
 
 //Function for Reduction of elements into field using Barrett Reduction algorithm
@@ -253,5 +252,18 @@ void FieldMult(uint32_t* num1, uint32_t* num2, uint32_t* result){
     
     uint32_t temp1[9]={0};    
     Barrett_Red(temp, p, result); // Reduce with Barrett
+}
+
+// Function to compute modular inverse of num in prime field using Fermat's Little Theorem
+void FieldInverse(uint32_t* num, uint8_t* result) {
+    uint32_t exp[10] = {0};  // Exponent (p-2)
+    
+    // Calculate the exponent p-2
+    for (int i = 0; i < 9; i++) {
+        exp[i] = p[i];
+    }
+    exp[0] -= 2;  // Subtract 2 from p for exponentiation
+
+    FieldExp_Montgomery_noBranching(num, exp, result);  // Compute num^(p-2) mod p to get the inverse
 }
 

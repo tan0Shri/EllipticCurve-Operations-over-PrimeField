@@ -19,13 +19,10 @@ int BitLength(uint32_t* exp) {
 }
 
 // Function to perform modular exponentiation in a prime field (left to right square and multiply)
-void FieldExp_left2right(uint32_t* exp, uint8_t* result) { 
+void FieldExp_left2right(uint32_t* base, uint32_t* exp, uint8_t* result) { 
     // Initialize result to 1 in packed base-29 format
     uint32_t tempResult[10] = {0};
     tempResult[0] = 0x1;
-
-    uint32_t base[10] = {0};
-    *base = *g;
 
     // Get the bit length of the exponent
     int expBitLength = BitLength(exp);
@@ -44,10 +41,10 @@ void FieldExp_left2right(uint32_t* exp, uint8_t* result) {
 }
 
 // Function to perform modular exponentiation in a prime field (right to left square and multiply)
-void FieldExp_right2left(uint32_t* exp, uint8_t* result) { 
+void FieldExp_right2left(uint32_t* base, uint32_t* exp, uint8_t* result) { 
     //copy base from g
-    uint32_t base[10] = {0};
-    *base = *g;
+    uint32_t b[10] = {0};
+    *b = *base;
 
     // Initialize result to 1 in packed base-29 format
     uint32_t tempResult[10] = {0x1, 0};
@@ -59,20 +56,20 @@ void FieldExp_right2left(uint32_t* exp, uint8_t* result) {
     for (int i = 0; i < expBitLength; i++) 
     {
         // Multiply step if the i-th bit of exp is set 
-        ((exp[i / 29] >> (i % 29)) & 1)? FieldMult(tempResult, base, tempResult) : NULL;
+        ((exp[i / 29] >> (i % 29)) & 1)? FieldMult(tempResult, b, tempResult) : NULL;
 
         // Square step
-        FieldMult(base, base, base);
+        FieldMult(b, b, b);
     }
 
     // Convert the result to base 16 for output
     ToBase16(tempResult, result);
 }
 
-void FieldExp_Montgomery(uint32_t* exp, uint8_t* result) { 
+void FieldExp_Montgomery(uint32_t* base, uint32_t* exp, uint8_t* result) { 
     // Initialize S to 1 and R to base in packed base-29 format
     uint32_t S[10] = {0};
-    *S = *g;  // S represents the current result, initialized to base
+    *S = *base;  // S represents the current result, initialized to base
     uint32_t R[10] = {0};       // R represents the "next" result 
     FieldMult(S, S, R);   // initialized to the base^2
 
@@ -98,9 +95,9 @@ void FieldExp_Montgomery(uint32_t* exp, uint8_t* result) {
     ToBase16(S, result);
 }
 
-void FieldExp_Montgomery_noBranching(uint32_t* exp, uint8_t* result) { 
+void FieldExp_Montgomery_noBranching(uint32_t* base, uint32_t* exp, uint8_t* result) { 
     uint32_t S[10] = {0};
-    *S = *g; // S is initialized to base
+    *S = *base; // S is initialized to base
     uint32_t R[10] = {0}; // R initialized to base^2
     FieldMult(S, S, R);
 

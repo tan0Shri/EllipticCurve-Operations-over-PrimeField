@@ -3,7 +3,9 @@
 // Function to calculate point doubling
 void dbl(uint32_t* x1, uint32_t* y1, uint32_t* x3, uint32_t* y3) {
     uint32_t lambda[10] = {0}, temp[10] = {0};
-
+    uint32_t three[10] = {0x3, 0};
+    uint32_t a[10] = {0x3, 0};
+    uint32_t two[10] = {0x2, 0};
     // Calculate λ = (3*x1^2 + a) / (2*y1) mod p
     FieldMult(x1, x1, temp);           // temp = x1^2
     FieldMult(temp, three, temp);      // temp = 3*x1^2
