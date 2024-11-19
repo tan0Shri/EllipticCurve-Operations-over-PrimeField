@@ -230,14 +230,14 @@ void FieldSubtraction(uint32_t *num1, uint32_t *num2, uint32_t *sub) {
 }
 
 //Function for Reduction of elements into field using Barrett Reduction algorithm
-void Barrett_Red(uint32_t* num, uint32_t* p, uint32_t* result){    
+void Barrett_Red(uint32_t* num, uint32_t* p, uint32_t* result){
     uint32_t q2[20] = {0}, temp[20] = {0};
     uint32_t *r1 = num, *r2 = temp;
     
     //computations for the Reduction
     Mult(num+8, T, q2, 10);
-    Mult(q2+10, p, temp, 10);   
-    
+    Mult(q2+10, p, temp, 10); 
+
     SUB(r1, r2, result, 10);    
 
 	(IsGreater(result, p))? SUB(result, p, result, 10) : NULL;
@@ -278,3 +278,24 @@ void FieldDivision(uint32_t* num1, uint32_t* num2, uint32_t* result) {
     FieldMult(num1, inverse, result);
 }
 
+//Function to multiply packed numbers in base 29
+void Field_ConstMult(uint32_t* num, int constant, uint32_t* result){
+    uint64_t mult[20] = {0}; 
+
+    // Multiplication by small constant
+    for(int i = 0; i < 9; i++){
+        mult[i] = (uint64_t)num[i] * (uint64_t)constant; 
+    }
+    
+    // Convert to 29-bit representation and handle carry
+    uint64_t carry = 0;
+    uint32_t temp[20] = {0};
+    for (int i = 0; i < 9; i++){
+        mult[i] += carry;
+        carry = mult[i] >> 29;
+        temp[i] = (uint32_t)(mult[i] & mask);
+        result[i] = 0;
+    }
+
+    Barrett_Red(temp, p, result);
+}

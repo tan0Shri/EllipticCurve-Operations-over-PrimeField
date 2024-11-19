@@ -77,6 +77,29 @@ int main()
     printBytes(x4, 32);
     printf("y4 : ");
     printBytes(y4, 32);
+
+    //scalar multiplication
+    printf("\nscalar multiplication of (x1,y1) :\n");
+    uint8_t scalar[32];
+    for (int i = 31; i >= 0; i--){
+        fscanf(in, "%02hhx",&scalar[i]);
+    }
+    printf("scalar: ");
+    printBytes(scalar, 32);
+    uint32_t scalar_29[10];
+    ToBase29(scalar, scalar_29, 32);
+
+
+    uint32_t x5_29[10], y5_29[10];
+    ScalarMult_left2right(x1_29, y1_29, scalar_29, x5_29, y5_29);
+    uint8_t x5[32], y5[32];
+    ToBase16(x5_29, x5);
+    ToBase16(y5_29, y5);
+    printf("x5 : ");
+    printBytes(x5, 32);
+    printf("y5 : ");
+    printBytes(y5, 32);
+
     
     fclose(in);
     return 0;

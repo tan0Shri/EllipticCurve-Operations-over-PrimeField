@@ -78,6 +78,14 @@ int main()
     printf("Division: ");
     printBytes(div, 32);
 
+
+    uint32_t res_29[10];
+    Field_ConstMult(n1, 0x3, res_29);
+    uint8_t res[32];
+    ToBase16(res_29, res);
+    printf("Multiplication by small constant: ");
+    printBytes(res, 32);
+
     fclose(in);
     return 0;
 }
