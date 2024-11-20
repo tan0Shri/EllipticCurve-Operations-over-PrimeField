@@ -278,7 +278,7 @@ void FieldDivision(uint32_t* num1, uint32_t* num2, uint32_t* result) {
     FieldMult(num1, inverse, result);
 }
 
-//Function to multiply packed numbers in base 29
+//Function to multiply 256 bit in packed form (base 29) by a small constant 
 void Field_ConstMult(uint32_t* num, int constant, uint32_t* result){
     uint64_t mult[20] = {0}; 
 
