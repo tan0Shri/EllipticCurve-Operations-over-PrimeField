@@ -42,6 +42,8 @@ int main()
     printf("y2 : ");
     printBytes(y2,32);
 
+    
+
     //Convert x1, y1 into base 29
     uint32_t x1_29[10] ={0};
     ToBase29(x1, x1_29, 32); 
@@ -53,6 +55,15 @@ int main()
     ToBase29(x2, x2_29, 32); 
     uint32_t y2_29[10] ={0};
     ToBase29(y2, y2_29, 32);
+
+    if (!IsPointOnCurve(x1_29, y1_29)) {
+    printf("Point (x1, y1) is not on the curve!\n");
+    return 1;
+    }
+    if (!IsPointOnCurve(x2_29, y2_29)) {
+        printf("Point (x2, y2) is not on the curve!\n");
+        return 1;
+    }
 
     //point addition : (x1,y1)+(x2,y2)
     uint32_t x3_29[10], y3_29[10];
@@ -89,7 +100,7 @@ int main()
     uint32_t scalar_29[10];
     ToBase29(scalar, scalar_29, 32);
 
-
+    printf("\n(using doubling and addition algorithm (left to right))-\n");
     uint32_t x5_29[10], y5_29[10];
     ScalarMult_left2right(x1_29, y1_29, scalar_29, x5_29, y5_29);
     uint8_t x5[32], y5[32];
@@ -99,6 +110,18 @@ int main()
     printBytes(x5, 32);
     printf("y5 : ");
     printBytes(y5, 32);
+
+    printf("\n(using doubling and addition algorithm (right to left))-\n");
+    uint32_t x6_29[10], y6_29[10];
+    ScalarMult_right2left(x1_29, y1_29, scalar_29, x6_29, y6_29);
+    uint8_t x6[32], y6[32];
+    ToBase16(x6_29, x6);
+    ToBase16(y6_29, y6);
+    printf("x6 : ");
+    printBytes(x6, 32);
+    printf("y6 : ");
+    printBytes(y6, 32);
+
 
     
     fclose(in);
