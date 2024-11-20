@@ -49,7 +49,7 @@ void printBytes(uint8_t* num, int bytes) {
     while (start >= 0 && num[start] == 0) {
         start--;
     }
-    printf("0x");
+    printf("0x0");
     // Print bytes from the first non-zero byte to the least significant byte
     for (int i = start; i >= 0; i--) {
         printf("%02x", num[i]);
@@ -278,7 +278,7 @@ void FieldDivision(uint32_t* num1, uint32_t* num2, uint32_t* result) {
     FieldMult(num1, inverse, result);
 }
 
-//Function to multiply packed numbers in base 29
+//Function to multiply 256 bit in packed form (base 29) by a small constant 
 void Field_ConstMult(uint32_t* num, int constant, uint32_t* result){
     uint64_t mult[20] = {0}; 
 

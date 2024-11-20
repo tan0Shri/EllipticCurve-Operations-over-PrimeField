@@ -13,7 +13,17 @@ int main()
         perror("Error opening file");
         return 1;
     }
+
+    //printing the given curve
+    uint8_t a_16[32], b_16[32];
+    ToBase16(a, a_16);
+    ToBase16(b, b_16);
+    printf("Given elliptic curve: y^2 = x^3 + ax + b (mod p) where \na = ");
+    printBytes(a_16, 32);
+    printf("b = ");
+    printBytes(b_16, 32);
         
+    // copying the points from Input file
     uint8_t x1[32];
     for (int i = 31; i >= 0; i--){
         fscanf(in, "%02hhx",&x1[i]);
@@ -22,7 +32,7 @@ int main()
     for (int i = 31; i >= 0; i--){
         fscanf(in, "%02hhx",&y1[i]);
     }
-    printf("Given first points:\n");
+    printf("\nGiven first points:\n");
     printf("x1 : ");
     printBytes(x1,32);
     printf("y1 : ");
@@ -56,6 +66,7 @@ int main()
     uint32_t y2_29[10] ={0};
     ToBase29(y2, y2_29, 32);
 
+    // check given points lies on curve or not
     if (!IsPointOnCurve(x1_29, y1_29)) {
     printf("Point (x1, y1) is not on the curve!\n");
     return 1;
@@ -64,6 +75,8 @@ int main()
         printf("Point (x2, y2) is not on the curve!\n");
         return 1;
     }
+
+    printf("Given points lies on curve.\n");
 
     //point addition : (x1,y1)+(x2,y2)
     uint32_t x3_29[10], y3_29[10];
@@ -99,6 +112,9 @@ int main()
     printBytes(scalar, 32);
     uint32_t scalar_29[10];
     ToBase29(scalar, scalar_29, 32);
+
+    // Cheching compatibility of exponent for DH-KeyExchange
+    if(!IsCompatible(scalar_29)) printf("Warning: Given scalar is not preferrable to use in KeyExchange\n");
 
     printf("\n(using doubling and addition algorithm (left to right))-\n");
     uint32_t x5_29[10], y5_29[10];

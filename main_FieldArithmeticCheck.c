@@ -12,12 +12,13 @@ int main()
         perror("Error opening file");
         return 1;
     }
-        
+    
+    // copy num1 from the file
     uint8_t num1[32];
     for (int i = 31; i >= 0; i--){
         fscanf(in, "%02hhx",&num1[i]);
     }
-
+    //copy num2 from the file
     uint8_t num2[32];
     for (int i = 31; i >= 0; i--){
         fscanf(in, "%02hhx",&num2[i]);
@@ -42,7 +43,7 @@ int main()
     FieldAddition(n1, n2, sum_29);
     uint8_t sum[32];
     ToBase16(sum_29, sum);  
-    printf("\nSum : ");  
+    printf("\nSum a+b mod p: ");  
     printBytes(sum, 32);
 
     //subtracting num1 and num2
@@ -50,13 +51,13 @@ int main()
     FieldSubtraction(n1, n2, sub_29);
     uint8_t sub[32];
     ToBase16(sub_29, sub);  
-    printf("Sub : ");  
+    printf("Sub a-b mod p: ");  
     printBytes(sub, 32);
 
     //Multiplying num1 and num2
     uint32_t mult_base29[10];
     FieldMult(n1, n2, mult_base29);
-    printf("Mult: ");   
+    printf("Mult a*b mod p: ");   
     uint8_t mult[32];
     ToBase16(mult_base29, mult);
     printBytes(mult, 32);
@@ -67,7 +68,7 @@ int main()
     uint8_t inv1[32];
     ToBase16(inv_29, inv1);
     //FieldInverse(n1, inv1);
-    printf("Inverse of a: ");
+    printf("Inv a^{-1} mod p: ");
     printBytes(inv1, 32);
 
     // Dividing num1 by num2 in primeField
@@ -75,16 +76,8 @@ int main()
     FieldDivision(n1, n2, div_29);
     uint8_t div[32];
     ToBase16(div_29, div);
-    printf("Division: ");
+    printf("Div a/b mod p: ");
     printBytes(div, 32);
-
-
-    uint32_t res_29[10];
-    Field_ConstMult(n1, 0x3, res_29);
-    uint8_t res[32];
-    ToBase16(res_29, res);
-    printf("Multiplication by small constant: ");
-    printBytes(res, 32);
 
     fclose(in);
     return 0;

@@ -18,11 +18,22 @@ int BitLength(uint32_t* exp) {
     return 0;  // If exp is zero, bit length is 0
 }
 
+// Function check 2 <= exp <= p-2
+int IsCompatible(uint32_t* exp){
+    uint32_t two[10] = {0x2,0};
+    uint32_t p_2[10] = {0};
+    p_2[0] = p[0] - 2;
+    for(int i = 1; i < 9; i++){
+        p_2[i] = p[i];
+    }
+    int flag = (IsGreater(exp, two) && IsGreater(p_2, exp));
+    return flag;
+}
+
 // Function to perform modular exponentiation in a prime field (left to right square and multiply)
-void FieldExp_left2right(uint32_t* base, uint32_t* exp, uint8_t* result) { 
+void FieldExp_left2right(uint32_t* base, uint32_t* exp, uint32_t* result) { 
     // Initialize result to 1 in packed base-29 format
-    uint32_t tempResult[10] = {0};
-    tempResult[0] = 0x1;
+    result[0] = 0x1;
 
     // Get the bit length of the exponent
     int expBitLength = BitLength(exp);
@@ -30,18 +41,16 @@ void FieldExp_left2right(uint32_t* base, uint32_t* exp, uint8_t* result) {
     //Loop through each bit of the exponent from the most significant to the least
     for (int i = expBitLength - 1; i >= 0; i--) {
         // Square step
-        FieldMult(tempResult, tempResult, tempResult);  // tempResult = tempResult^2 (mod p)
+        FieldMult(result, result, result);  // tempResult = tempResult^2 (mod p)
     
-        // Multiply step if the i-th bit of exp is set 
-        ((exp[i / 29] >> (i % 29)) & 1)? FieldMult(tempResult, base, tempResult) : NULL;
+        // Multiply step if the i-th bit of exp is set
+        ((exp[i / 29] >> (i % 29)) & 1)? FieldMult(result, base, result) : NULL;
     }
-
-    // Convert the result to base 16 for output
-    ToBase16(tempResult, result);
 }
 
+
 // Function to perform modular exponentiation in a prime field (right to left square and multiply)
-void FieldExp_right2left(uint32_t* base, uint32_t* exp, uint8_t* result) { 
+void FieldExp_right2left(uint32_t* base, uint32_t* exp, uint32_t* result) { 
     //copy base from g
     uint32_t b[10] = {0};
     for(int i = 0; i < 9; i++){
@@ -49,7 +58,7 @@ void FieldExp_right2left(uint32_t* base, uint32_t* exp, uint8_t* result) {
     }
 
     // Initialize result to 1 in packed base-29 format
-    uint32_t tempResult[10] = {0x1, 0};
+    result[0] = 0x1;
 
     // Get the bit length of the exponent
     int expBitLength = BitLength(exp);
@@ -58,17 +67,15 @@ void FieldExp_right2left(uint32_t* base, uint32_t* exp, uint8_t* result) {
     for (int i = 0; i < expBitLength; i++) 
     {
         // Multiply step if the i-th bit of exp is set 
-        ((exp[i / 29] >> (i % 29)) & 1)? FieldMult(tempResult, b, tempResult) : NULL;
+        ((exp[i / 29] >> (i % 29)) & 1)? FieldMult(result, b, result) : NULL;
 
         // Square step
         FieldMult(b, b, b);
     }
-
-    // Convert the result to base 16 for output
-    ToBase16(tempResult, result);
 }
 
-void FieldExp_Montgomery(uint32_t* base, uint32_t* exp, uint8_t* result) { 
+// Function to perform modular exponentiation in a prime field (using Montgomery Ladder)
+void FieldExp_Montgomery(uint32_t* base, uint32_t* exp, uint32_t* result) { 
     // Initialize S to 1 and R to base in packed base-29 format
     uint32_t S[10] = {0};
     // S represents the current result, initialized to base
@@ -96,10 +103,13 @@ void FieldExp_Montgomery(uint32_t* base, uint32_t* exp, uint8_t* result) {
             FieldMult(S, S, S); // Square S
         }
     }
-    // Convert S to base 16 for output
-    ToBase16(S, result);
+    // Copy S to result
+    for(int i = 0; i < 9; i++){
+        result[i] = S[i];
+    }
 }
 
+// Without BRANCHING: Function to perform modular exponentiation in a prime field (using Montgomery Ladder)
 void FieldExp_Montgomery_noBranching(uint32_t* base, uint32_t* exp, uint32_t* result) { 
     uint32_t S[10] = {0};
     // S is initialized to base
