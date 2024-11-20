@@ -88,59 +88,81 @@ void ScalarMult_left2right(uint32_t* x, uint32_t* y, uint32_t* scalar, uint32_t*
     // Get the bit length of the scalar
     int scalarBitLength = BitLength(scalar);
 
-    // Loop through each bit of the scalar from the most significant to the least
+    // Loop through each bit of the scalar from most significant to least
     for (int i = scalarBitLength - 1; i >= 0; i--) {
         // Point doubling step: R = 2*R
-        if (xR[0] != 0 || yR[0] != 0) {  // Skip if R is the point at infinity
             dbl(xR, yR, xTemp, yTemp);
             memcpy(xR, xTemp, sizeof(uint32_t) * 10);
             memcpy(yR, yTemp, sizeof(uint32_t) * 10);
-        }
+
+        // Get the current bit of the scalar
+        int flag = (scalar[i / 29] >> (i % 29)) & 1;
 
         // Point addition step if the current bit is 1: R = R + P
-        int flag = (scalar[i / 29] >> (i % 29)) & 1;
-        if (flag) {
-            if (xR[0] == 0 && yR[0] == 0) {
-                // If R is the point at infinity, set R = P
-                memcpy(xR, x, sizeof(uint32_t) * 10);
-                memcpy(yR, y, sizeof(uint32_t) * 10);
-            } else {
-                add(xR, yR, x, y, xTemp, yTemp);
-                memcpy(xR, xTemp, sizeof(uint32_t) * 10);
-                memcpy(yR, yTemp, sizeof(uint32_t) * 10);
-            }
+        uint32_t tempX[10], tempY[10];
+        add(xR, yR, x, y, tempX, tempY);
+        for (int j = 0; j < 10; j++) {
+            // Use flag to decide whether to add or leave R unchanged
+            xR[j] = flag * tempX[j] + (1 - flag) * xR[j];
+            yR[j] = flag * tempY[j] + (1 - flag) * yR[j];
         }
     }
 }
 
+
+
 void ScalarMult_right2left(uint32_t* x, uint32_t* y, uint32_t* scalar, uint32_t* xR, uint32_t* yR) {
-    // Initialize R = P and Q = point at infinity
+    // Initialize Q = point at infinity and R = P
     uint32_t xQ[10] = {0}, yQ[10] = {0};   // Q = point at infinity (0, 0)
-    memcpy(xR, x, sizeof(uint32_t) * 10);  // R(xR,yR) = P(x,y)
+    uint32_t xTemp[10], yTemp[10];        // Temporary variables for computation
+    memcpy(xR, x, sizeof(uint32_t) * 10); // R(xR, yR) = P(x, y)
     memcpy(yR, y, sizeof(uint32_t) * 10);
 
     // Get the bit length of the scalar
     int scalarBitLength = BitLength(scalar);
 
-    // Loop through each bit of the scalar from the least significant to the most
+    // Loop through each bit of the scalar from least significant to most
     for (int i = 0; i < scalarBitLength; i++) {
         int flag = (scalar[i / 29] >> (i % 29)) & 1;
-        
+
+        // if (xQ[0] == 0 && yQ[0] == 0) {
+        //     // Q = R if Q is point at infinity
+        //     memcpy(xQ, xR, sizeof(uint32_t) * 10);
+        //     memcpy(yQ, yR, sizeof(uint32_t) * 10);
+        // } else {
+        //     // Q = Q + R using point addition
+        //     add(xQ, yQ, xR, yR, xTemp, yTemp); // Temporary variables for Q + R
+        //     for (int j = 0; j < 10; j++) {
+        //     xQ[j] = flag * xTemp[j] + (1 - flag) * xQ[j];
+        //     yQ[j] = flag * yTemp[j] + (1 - flag) * yQ[j];
+        //     }
+        // }
         if (flag) {
-            // Q = Q + R
+            //Q = Q + R
+                
             if (xQ[0] == 0 && yQ[0] == 0) {
-                memcpy(xQ, xR, sizeof(uint32_t) * 10);  // Q = R
+                // Q = R if Q is point at infinity
+                memcpy(xQ, xR, sizeof(uint32_t) * 10);
                 memcpy(yQ, yR, sizeof(uint32_t) * 10);
             } else {
-                add(xQ, yQ, xR, yR, xQ, yQ);           // Q = Q + R
+                // Q = Q + R using point addition
+                add(xQ, yQ, xR, yR, xTemp, yTemp); // Temporary variables for Q + R
+                memcpy(xQ, xTemp, sizeof(uint32_t) * 10);
+                memcpy(yQ, yTemp, sizeof(uint32_t) * 10);
             }
         }
-        // R = 2*R
-        dbl(xR, yR, xR, yR);
+        // R = 2*R using point doubling
+        uint32_t tempX[10], tempY[10];
+        dbl(xR, yR, tempX, tempY);
+        memcpy(xR, tempX, sizeof(uint32_t) * 10);
+        memcpy(yR, tempY, sizeof(uint32_t) * 10);
     }
 
     // Result is stored in Q
     memcpy(xR, xQ, sizeof(uint32_t) * 10);
     memcpy(yR, yQ, sizeof(uint32_t) * 10);
 }
+
+
+
 
