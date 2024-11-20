@@ -49,7 +49,7 @@ void printBytes(uint8_t* num, int bytes) {
     while (start >= 0 && num[start] == 0) {
         start--;
     }
-    printf("0x");
+    printf("0x0");
     // Print bytes from the first non-zero byte to the least significant byte
     for (int i = start; i >= 0; i--) {
         printf("%02x", num[i]);

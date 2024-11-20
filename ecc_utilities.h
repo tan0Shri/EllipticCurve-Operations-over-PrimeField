@@ -5,6 +5,7 @@
 #include<stdbool.h>
 
 extern uint32_t a[10];
+extern uint32_t b[10];
 bool IsPointOnCurve(uint32_t* x, uint32_t* y);
 void dbl(uint32_t* x1, uint32_t* y1, uint32_t* x3, uint32_t* y3);
 void add(uint32_t* x1, uint32_t* y1, uint32_t* x2, uint32_t* y2, uint32_t* x3, uint32_t* y3);
