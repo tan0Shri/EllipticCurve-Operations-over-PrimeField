@@ -2,9 +2,15 @@
 #include"ecc_utilities.h"
 #include<string.h>
 
-uint32_t a[10] = {0x3, 0};
+//uint32_t a[10] = {0x3, 0};
+//uint32_t b[10] = {0};
+
+// Initializing curve parameters a and b in base 29
+uint32_t a[10] = {0};
 uint32_t b[10] = {0};
 
+
+// Function to check that input points lie on the curve or not
 bool IsPointOnCurve(uint32_t* x, uint32_t* y) {
     uint32_t y_squared[10] = {0};
     uint32_t x_cubed[10] = {0};
@@ -77,36 +83,76 @@ void dbl(uint32_t* x1, uint32_t* y1, uint32_t* x4, uint32_t* y4) {
 }
 
 
-void ScalarMult_left2right(uint32_t* x, uint32_t* y, uint32_t* scalar, uint32_t* xR, uint32_t* yR) {
-    // Initialize result as the point at infinity (null point)
-    memset(xR, 0, sizeof(uint32_t) * 10);
-    memset(yR, 0, sizeof(uint32_t) * 10);
+// void ScalarMult_left2right(uint32_t* x, uint32_t* y, uint32_t* scalar, uint32_t* xR, uint32_t* yR) {
+//     // Initialize result as the point at infinity (null point)
+//     memset(xR, 0, sizeof(uint32_t) * 10);
+//     memset(yR, 0, sizeof(uint32_t) * 10);
 
-    // Temporary variables for intermediate computations
-    uint32_t xTemp[10] = {0}, yTemp[10] = {0};
+//     // Temporary variables for intermediate computations
+//     uint32_t xTemp[10] = {0}, yTemp[10] = {0};
+
+//     // Get the bit length of the scalar
+//     int scalarBitLength = BitLength(scalar);
+
+//     // Loop through each bit of the scalar from most significant to least
+//     for (int i = scalarBitLength - 1; i >= 0; i--) {
+//         // Point doubling step: R = 2*R
+//             dbl(xR, yR, xTemp, yTemp);
+//             memcpy(xR, xTemp, sizeof(uint32_t) * 10);
+//             memcpy(yR, yTemp, sizeof(uint32_t) * 10);
+
+//         // Get the current bit of the scalar
+//         int flag = (scalar[i / 29] >> (i % 29)) & 1;
+
+//         // Point addition step if the current bit is 1: R = R + P
+//         uint32_t tempX[10], tempY[10];
+//         add(xR, yR, x, y, tempX, tempY);
+//         for (int j = 0; j < 10; j++) {
+//             // Use flag to decide whether to add or leave R unchanged
+//             xR[j] = flag * tempX[j] + (1 - flag) * xR[j];
+//             yR[j] = flag * tempY[j] + (1 - flag) * yR[j];
+//         }
+//     }
+// }
+
+void ScalarMult_left2right(uint32_t* x, uint32_t* y, uint32_t* scalar, uint32_t* xR, uint32_t* yR) {
+    // Initialize result as the point at infinity
+    uint32_t xQ[10] = {0}, yQ[10] = {0};  // Q = point at infinity
+    uint32_t xTemp[10], yTemp[10];       // Temporary variables for computation
 
     // Get the bit length of the scalar
     int scalarBitLength = BitLength(scalar);
 
     // Loop through each bit of the scalar from most significant to least
     for (int i = scalarBitLength - 1; i >= 0; i--) {
-        // Point doubling step: R = 2*R
-            dbl(xR, yR, xTemp, yTemp);
-            memcpy(xR, xTemp, sizeof(uint32_t) * 10);
-            memcpy(yR, yTemp, sizeof(uint32_t) * 10);
+        // R = 2*R (point doubling)
+        if (xQ[0] != 0 || yQ[0] != 0) { // Skip doubling for the initial point at infinity
+            dbl(xQ, yQ, xTemp, yTemp);
+            memcpy(xQ, xTemp, sizeof(uint32_t) * 10);
+            memcpy(yQ, yTemp, sizeof(uint32_t) * 10);
+        }
 
-        // Get the current bit of the scalar
+        // Extract the current bit of the scalar
         int flag = (scalar[i / 29] >> (i % 29)) & 1;
 
-        // Point addition step if the current bit is 1: R = R + P
-        uint32_t tempX[10], tempY[10];
-        add(xR, yR, x, y, tempX, tempY);
-        for (int j = 0; j < 10; j++) {
-            // Use flag to decide whether to add or leave R unchanged
-            xR[j] = flag * tempX[j] + (1 - flag) * xR[j];
-            yR[j] = flag * tempY[j] + (1 - flag) * yR[j];
+        // If bit is 1, perform Q = Q + P
+        if (flag) {
+            if (xQ[0] == 0 && yQ[0] == 0) {
+                // If Q is the point at infinity, set Q = P
+                memcpy(xQ, x, sizeof(uint32_t) * 10);
+                memcpy(yQ, y, sizeof(uint32_t) * 10);
+            } else {
+                // Q = Q + P using point addition
+                add(xQ, yQ, x, y, xTemp, yTemp);
+                memcpy(xQ, xTemp, sizeof(uint32_t) * 10);
+                memcpy(yQ, yTemp, sizeof(uint32_t) * 10);
+            }
         }
     }
+
+    // Result is stored in Q
+    memcpy(xR, xQ, sizeof(uint32_t) * 10);
+    memcpy(yR, yQ, sizeof(uint32_t) * 10);
 }
 
 
@@ -124,19 +170,7 @@ void ScalarMult_right2left(uint32_t* x, uint32_t* y, uint32_t* scalar, uint32_t*
     // Loop through each bit of the scalar from least significant to most
     for (int i = 0; i < scalarBitLength; i++) {
         int flag = (scalar[i / 29] >> (i % 29)) & 1;
-
-        // if (xQ[0] == 0 && yQ[0] == 0) {
-        //     // Q = R if Q is point at infinity
-        //     memcpy(xQ, xR, sizeof(uint32_t) * 10);
-        //     memcpy(yQ, yR, sizeof(uint32_t) * 10);
-        // } else {
-        //     // Q = Q + R using point addition
-        //     add(xQ, yQ, xR, yR, xTemp, yTemp); // Temporary variables for Q + R
-        //     for (int j = 0; j < 10; j++) {
-        //     xQ[j] = flag * xTemp[j] + (1 - flag) * xQ[j];
-        //     yQ[j] = flag * yTemp[j] + (1 - flag) * yQ[j];
-        //     }
-        // }
+        
         if (flag) {
             //Q = Q + R
                 

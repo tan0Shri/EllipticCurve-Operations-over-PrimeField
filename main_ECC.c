@@ -8,22 +8,30 @@ int main()
     PrimeInputs();
 
     // Opening input file
-    FILE *in = fopen("ecc_inputs.txt", "r");
+    FILE *in = fopen("ecc_inputs1.txt", "r");
     if (in == NULL) {
         perror("Error opening file");
         return 1;
     }
 
-    //printing the given curve
+    //  Taking inputs for curve parameters from the file
     uint8_t a_16[32], b_16[32];
-    ToBase16(a, a_16);
-    ToBase16(b, b_16);
+    for (int i = 31; i >= 0; i--){
+        fscanf(in, "%02hhx",&a_16[i]);
+    }
+    for (int i = 31; i >= 0; i--){
+        fscanf(in, "%02hhx",&b_16[i]);
+    }
+    //printing the given curve
     printf("Given elliptic curve: y^2 = x^3 + ax + b (mod p) where \na = ");
     printBytes(a_16, 32);
     printf("b = ");
     printBytes(b_16, 32);
+    // convert a and b to base 29
+    ToBase29(a_16, a, 32);
+    ToBase29(b_16, b, 32);
         
-    // copying the points from Input file
+    // copying the 1st pair of point on the curve from Input file
     uint8_t x1[32];
     for (int i = 31; i >= 0; i--){
         fscanf(in, "%02hhx",&x1[i]);
@@ -38,6 +46,7 @@ int main()
     printf("y1 : ");
     printBytes(y1,32);
 
+    // copying the 2nd pair of point on the curve from Input file
     uint8_t x2[32];
     for (int i = 31; i >= 0; i--){
         fscanf(in, "%02hhx",&x2[i]);
@@ -78,7 +87,7 @@ int main()
 
     printf("Given points lies on curve.\n");
 
-    //point addition : (x1,y1)+(x2,y2)
+    //point addition : (x1,y1) + (x2,y2)
     uint32_t x3_29[10], y3_29[10];
     add(x1_29, y1_29, x2_29, y2_29, x3_29, y3_29);
     uint8_t x3[32], y3[32];
@@ -143,4 +152,3 @@ int main()
     fclose(in);
     return 0;
 }
-
