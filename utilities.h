@@ -32,7 +32,7 @@ void FieldInverse(uint32_t* num, uint32_t* result);     // compute modular inver
 void FieldDivision(uint32_t* num1, uint32_t* num2, uint32_t* result); // divide num1 by num2 in prime field (i.e., (num1 * num2^-1) mod p)
 void Field_ConstMult(uint32_t* num, int constant, uint32_t* result);    // multiply 256 bit in packed form (base 29) by a small constant 
 
-
+int IsZero(uint32_t* num, int length); //   checks num in base 29 is zero or not
 int BitLength(uint32_t* exp);   // computes no of bits
 int IsCompatible(uint32_t* exp);    // check 2 <= exp <= p-2
 void FieldExp_left2right(uint32_t* base, uint32_t* exponent, uint32_t* result);     // perform modular exponentiation in a prime field (left to right square and multiply)
