@@ -74,36 +74,6 @@ void ToBase29(uint8_t* src, uint32_t* dest, int bytes){
     }
 }
 
-/*void ToBase29(uint8_t* b, uint32_t* c) {
-    int byteIndex = 0;  // Tracks position in the 'b' array
-    int bitRightShift[] = {0, 5, 2, 7, 4, 1, 6, 3};  // Different shifts for each 29-bit chunk
-    int bitLeftShift[] = {0, 27, 0, 25, 28, 0, 26, 0};
-
-    for (int i = 0; i < 7; i++) {
-        c[i] = (uint32_t)b[byteIndex] |
-               ((uint32_t)b[byteIndex + 1] << 8) |
-               ((uint32_t)b[byteIndex + 2] << 16) |
-               ((uint32_t)b[byteIndex + 3] << 24);
-        c[i] = (bitRightShift[i] == 0 || bitRightShift[i] == 4) ? (c[i] >> bitRightShift[i]) | (((uint32_t)b[byteIndex + 4]) << bitLeftShift[i]) : (c[i] >> bitRightShift[i]) ;// Apply shifting 
-        if (i==2)
-        printf("\n%d\n",(bitRightShift[i] == 0 || bitRightShift[i] == 4));
-        c[i] &= 0x1FFFFFFF;  //apply mask
-        byteIndex += (bitRightShift[i] == 0 || bitRightShift[i] == 4) ? 3 : 4;  // Adjust based on shift
-    }
-
-    // Last element handles remaining 24 bits
-    c[7] = (uint32_t)b[byteIndex] |
-           ((uint32_t)b[byteIndex + 1] << 8) |
-           ((uint32_t)b[byteIndex + 2] << 16);
-    c[7] &= 0x00FFFFFF;  // Last element stores 24 bits
-
-    for (int i = 0; i < 9; i++)
-    {
-        printf("\na[%d] = %08x", i, c[i]);
-    }
-    printf("\n");
-}*/
-
 //Function to convert a number to base 16
 void ToBase16(uint32_t* src, uint8_t* dest){
     dest[0] = (uint8_t)src[0];

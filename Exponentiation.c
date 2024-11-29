@@ -4,6 +4,17 @@
 // Initialize base as g = 2
 uint32_t g[10] = {0x2, 0};
 
+//  Function to check if given num in base 29 is zero or not
+int IsZero(uint32_t* num, int length) {
+    for (int i = 0; i < length; i++) {
+        if (num[i] != 0) {
+            return 0; // Return 0 if any digit is non-zero
+        }
+    }
+    return 1; // Return 1 if all digits are zero
+}
+
+
 // Function to get the bit length of the exponent
 int BitLength(uint32_t* exp) {
     for (int i = 8; i >= 0; i--) {  // Traverse from the most significant chunk
@@ -18,15 +29,15 @@ int BitLength(uint32_t* exp) {
     return 0;  // If exp is zero, bit length is 0
 }
 
-// Function check 2 <= exp <= p-2
+// Function check 2 <= exp <= p-2, i.e, 1 < exp < p-1
 int IsCompatible(uint32_t* exp){
-    uint32_t two[10] = {0x2,0};
-    uint32_t p_2[10] = {0};
-    p_2[0] = p[0] - 2;
+    uint32_t one[10] = {0x1,0};
+    uint32_t p_1[10] = {0};
+    p_1[0] = p[0] - 1;
     for(int i = 1; i < 9; i++){
-        p_2[i] = p[i];
+        p_1[i] = p[i];
     }
-    int flag = (IsGreater(exp, two) && IsGreater(p_2, exp));
+    int flag = (IsGreater(exp, one) && IsGreater(p_1, exp));
     return flag;
 }
 
@@ -76,6 +87,13 @@ void FieldExp_right2left(uint32_t* base, uint32_t* exp, uint32_t* result) {
 
 // Function to perform modular exponentiation in a prime field (using Montgomery Ladder)
 void FieldExp_Montgomery(uint32_t* base, uint32_t* exp, uint32_t* result) { 
+    if (IsZero(exp, 10)) {
+    result[0] = 1; // Initialize result as 1 (mod p)
+    for (int i = 1; i < 9; i++) {
+        result[i] = 0;
+    }
+    return;
+    }
     // Initialize S to 1 and R to base in packed base-29 format
     uint32_t S[10] = {0};
     // S represents the current result, initialized to base
@@ -111,6 +129,13 @@ void FieldExp_Montgomery(uint32_t* base, uint32_t* exp, uint32_t* result) {
 
 // Without BRANCHING: Function to perform modular exponentiation in a prime field (using Montgomery Ladder)
 void FieldExp_Montgomery_noBranching(uint32_t* base, uint32_t* exp, uint32_t* result) { 
+    if (IsZero(exp, 10)) {
+    result[0] = 1; // Initialize result as 1 (mod p)
+    for (int i = 1; i < 9; i++) {
+        result[i] = 0;
+    }
+    return;
+    }
     uint32_t S[10] = {0};
     // S is initialized to base
     for(int i = 0; i < 9; i++){
