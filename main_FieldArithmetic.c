@@ -148,6 +148,7 @@ int main()
     printBytes(res4, 32);
 
     fclose(in);
+    fclose(out);
     return 0;
 }
 
