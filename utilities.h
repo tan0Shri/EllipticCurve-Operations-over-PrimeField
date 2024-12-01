@@ -1,10 +1,11 @@
 #ifndef UTILITIES_H   // Header guard to avoid multiple inclusion
 #define UTILITIES_H
 
+#include<stdio.h>
 #include<stdint.h>
 
 extern uint32_t mask; //mask for lower 29-bits
-
+extern FILE* out;
 //declaration of global arrays
 extern uint8_t prime[32];   //prime in base 16
 extern uint8_t mu[34];      // mu=(2^(2*29*9))/prime in base 16
@@ -16,7 +17,6 @@ extern uint32_t g[10];  // base for exponentiation in base 29
 
 // Function prototypes
 void PrimeInputs();   //scans the inputes related to prime-Field from file
-void StringToArray(const char *hexstring, uint8_t *dest);
 void printBytes(uint8_t* num, int bytes);     // Prints byte array
 void ToBase29(uint8_t* src, uint32_t* dest, int bytes); // Converts data to base 29
 void ToBase16(uint32_t* src, uint8_t* dest); // Converts data to base 16 (hexadecimal)
@@ -30,7 +30,7 @@ void Barrett_Red(uint32_t* num, uint32_t* p, uint32_t* result); //reduction algo
 void FieldMult(uint32_t* num1, uint32_t* num2, uint32_t* result); //performs field multiplication (with reduction)
 void FieldInverse(uint32_t* num, uint32_t* result);     // compute modular inverse of num in prime field using Fermat's Little Theorem
 void FieldDivision(uint32_t* num1, uint32_t* num2, uint32_t* result); // divide num1 by num2 in prime field (i.e., (num1 * num2^-1) mod p)
-void Field_ConstMult(uint32_t* num, int constant, uint32_t* result);    // multiply 256 bit in packed form (base 29) by a small constant 
+void Field_ConstMult(uint32_t* num, uint32_t constant, uint32_t* result);    // multiply 256 bit in packed form (base 29) by a small constant 
 
 int IsZero(uint32_t* num, int length); //   checks num in base 29 is zero or not
 int BitLength(uint32_t* exp);   // computes no of bits

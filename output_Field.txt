@@ -1,0 +1,31 @@
+-----------------------------------------------------------------------------
+FIELD ARITHMETIC OUTPUTS:
+-----------------------------------------------------------------------------
+Two numbers given-
+a: 0x78ae6fbfa1e4a734e9c9b1a55d826707107f8784e4accafd50f726417da9a84d
+b: 0xc43a291c2502b6e002c9ba5efaad8a4e444ad6c2c6bb0ad75bf9d4d3922ac366
+
+Sum a+b mod p: 0x53ba582e57bf418ae4686e3fba1c7eefc0749f7edc7dd19a4ba477b98fea7bbe
+Sub a-b mod p: 0x9da28750ec0a0cdeef2af50b00e84f1e608a6f8aecdbc4605649d4c96b68d4dc
+Mult a*b mod p: 0x3b7ff86865616aff57b4d2de0f8e68950bee21326729b4dd487db6a8c6f0a5fa
+Inv a^{-1} mod p: 0x1cf6b4fe39eb908d6798a63f1ceeab8f596ec25d39fe9f114642cb618c901544
+Div a/b mod p: 0x276463815a64715fa0ef1f9b6bb65afbbde2946f63e4447bbbdb5584c64744cc
+
+-----------------------------------------------------------------------------
+EXPONENTIATION OUTPUTS:
+-----------------------------------------------------------------------------
+Default Argument for Exponentiation is fixed here at primitive element of the group, i.e, g = 2
+Given exponent for exponentiation:
+e = 0x1b50014e06c430d5f5436db1aff38f2d9996c86afaf66dfc585f6ce9793af55b
+
+Required result (using left-to-right square and multiply algorithm):
+g^e mod p: 0xc07e4038b87688946eec1e605f9f0f59dc3f4f95c0bd8f41d39efdc0cb029580
+
+Required result (using right-to_left square and multiply algorithm):
+g^e mod p: 0xc07e4038b87688946eec1e605f9f0f59dc3f4f95c0bd8f41d39efdc0cb029580
+
+Required result (using montgomery scalar multiplication):
+g^e mod p: 0xc07e4038b87688946eec1e605f9f0f59dc3f4f95c0bd8f41d39efdc0cb029580
+
+Required result (using montgomery scalar multiplication WITHOUT BRANCHING):
+g^e mod p: 0xc07e4038b87688946eec1e605f9f0f59dc3f4f95c0bd8f41d39efdc0cb029580
