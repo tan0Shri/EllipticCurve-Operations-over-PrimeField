@@ -14,7 +14,6 @@ int IsZero(uint32_t* num, int length) {
     return 1; // Return 1 if all digits are zero
 }
 
-
 // Function to get the bit length of the exponent
 int BitLength(uint32_t* exp) {
     for (int i = 8; i >= 0; i--) {  // Traverse from the most significant chunk

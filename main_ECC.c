@@ -112,7 +112,9 @@ int main()
     printBytes(y4, 32);
 
     //scalar multiplication
+    printf("\n----------------------------------------");
     printf("\nscalar multiplication of (x1,y1) :\n");
+    printf("------------------------------------------\n");
     uint8_t scalar[32];
     for (int i = 31; i >= 0; i--){
         fscanf(in, "%02hhx",&scalar[i]);
@@ -121,9 +123,6 @@ int main()
     printBytes(scalar, 32);
     uint32_t scalar_29[10];
     ToBase29(scalar, scalar_29, 32);
-
-    // Cheching compatibility of exponent for DH-KeyExchange
-    if(!IsCompatible(scalar_29)) printf("Warning: Given scalar is not preferrable to use in KeyExchange\n");
 
     printf("\n(using doubling and addition algorithm (left to right))-\n");
     uint32_t x5_29[10], y5_29[10];

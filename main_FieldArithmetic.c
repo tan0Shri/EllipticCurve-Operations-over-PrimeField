@@ -1,3 +1,6 @@
+//bash to run this main--
+//compile-- "gcc -o main main_FieldArithmetic.c FieldArithmetic.c Exponentiation.c"
+//run-- "./main"
 #include<stdio.h>
 #include "utilities.h"
 
@@ -9,6 +12,12 @@ int main()
     // Opening input file
     FILE *in = fopen("input.txt", "r");
     if (in == NULL) {
+        perror("Error opening file");
+        return 1;
+    }
+    //Opening output file
+    out = fopen("output_Field.txt", "w");
+    if (out == NULL) {
         perror("Error opening file");
         return 1;
     }
@@ -24,10 +33,14 @@ int main()
         fscanf(in, "%02hhx",&num2[i]);
     }
 
-    printf("Two numbers given-\n");
-    printf("a: ");
+    fprintf(out, "-----------------------------------------------------------------------------");
+    fprintf(out, "\nFIELD ARITHMETIC OUTPUTS:\n");
+    fprintf(out, "-----------------------------------------------------------------------------\n");
+
+    fprintf(out, "Two numbers given-\n");
+    fprintf(out, "a: ");
     printBytes(num1,32);
-    printf("b: ");
+    fprintf(out, "b: ");
     printBytes(num2,32);
 
     //Convert num1 into base 29
@@ -43,7 +56,7 @@ int main()
     FieldAddition(n1, n2, sum_29);
     uint8_t sum[32];
     ToBase16(sum_29, sum);  
-    printf("\nSum a+b mod p: ");  
+    fprintf(out, "\nSum a+b mod p: ");  
     printBytes(sum, 32);
 
     //subtracting num1 and num2: num1 - num2
@@ -51,13 +64,13 @@ int main()
     FieldSubtraction(n1, n2, sub_29);
     uint8_t sub[32];
     ToBase16(sub_29, sub);  
-    printf("Sub a-b mod p: ");  
+    fprintf(out, "Sub a-b mod p: ");  
     printBytes(sub, 32);
 
     //Multiplying num1 and num2
     uint32_t mult_base29[10];
     FieldMult(n1, n2, mult_base29);
-    printf("Mult a*b mod p: ");   
+    fprintf(out, "Mult a*b mod p: ");   
     uint8_t mult[32];
     ToBase16(mult_base29, mult);
     printBytes(mult, 32);
@@ -67,7 +80,7 @@ int main()
     FieldInverse(n1, inv_29);
     uint8_t inv1[32];
     ToBase16(inv_29, inv1);
-    printf("Inv a^{-1} mod p: ");
+    fprintf(out, "Inv a^{-1} mod p: ");
     printBytes(inv1, 32);
 
     // Dividing num1 by num2 in primeField
@@ -75,20 +88,20 @@ int main()
     FieldDivision(n1, n2, div_29);
     uint8_t div[32];
     ToBase16(div_29, div);
-    printf("Div a/b mod p: ");
+    fprintf(out, "Div a/b mod p: ");
     printBytes(div, 32);
 
-    printf("\n--------------------------------");
-    printf("\nEXPONENTIATION OUTPUTS:\n");
-    printf("--------------------------------\n");
-    printf("Default Argument for Exponentiation is fixed here at primitive element of the group, i.e, g = 2");
+    fprintf(out, "\n-----------------------------------------------------------------------------");
+    fprintf(out, "\nEXPONENTIATION OUTPUTS:\n");
+    fprintf(out, "-----------------------------------------------------------------------------\n");
+    fprintf(out, "Default Argument for Exponentiation is fixed here at primitive element of the group, i.e, g = 2");
 
     //Exponentiation of primitive element g=2
     uint8_t exponent[32];
     for (int i = 31; i >= 0; i--){
         fscanf(in, "%02hhx",&exponent[i]);
     }
-    printf("\nGiven exponent for exponentiation:\n");
+    fprintf(out, "\nGiven exponent for exponentiation:\ne = ");
     printBytes(exponent, 32);
 
     // Converting the exponent to base 29
@@ -103,7 +116,8 @@ int main()
     FieldExp_left2right(g, exp, res1_29);
     uint8_t res1[32];
     ToBase16(res1_29, res1);
-    printf("\nRequired result (using left-to-right square and multiply algorithm):\n");
+    fprintf(out, "\nRequired result (using left-to-right square and multiply algorithm):\n");
+    fprintf(out, "g^e mod p: ");
     printBytes(res1, 32);
 
     //computation of g^exponent (right 2 left)
@@ -111,7 +125,8 @@ int main()
     FieldExp_right2left(g, exp, res2_29);
     uint8_t res2[32];
     ToBase16(res2_29, res2);
-    printf("\nRequired result (using right-to_left square and multiply algorithm):\n");
+    fprintf(out, "\nRequired result (using right-to_left square and multiply algorithm):\n");
+    fprintf(out, "g^e mod p: ");
     printBytes(res2, 32);
 
     //computation of g^exponent (Montgomery Scalar multiplication)
@@ -119,7 +134,8 @@ int main()
     FieldExp_Montgomery(g, exp, res3_29);
     uint8_t res3[32];
     ToBase16(res3_29, res3);
-    printf("\nRequired result (using montgomery scalar multiplication):\n");
+    fprintf(out, "\nRequired result (using montgomery scalar multiplication):\n");
+    fprintf(out, "g^e mod p: ");
     printBytes(res3, 32);
 
     //computation of g^exponent (Montgomery Scalar multiplication without BRANCHING)
@@ -127,7 +143,8 @@ int main()
     FieldExp_Montgomery_noBranching(g, exp, res4_29);
     uint8_t res4[32];
     ToBase16(res4_29, res4);
-    printf("\nRequired result (using montgomery scalar multiplication WITHOUT BRANCHING):\n");
+    fprintf(out, "\nRequired result (using montgomery scalar multiplication WITHOUT BRANCHING):\n");
+    fprintf(out, "g^e mod p: ");
     printBytes(res4, 32);
 
     fclose(in);

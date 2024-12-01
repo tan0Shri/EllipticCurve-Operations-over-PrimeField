@@ -3,6 +3,7 @@
 #include<stdlib.h>
 #include "utilities.h"
 
+FILE* out;
 uint32_t mask = 0x1FFFFFFF; // 29-bit mask: 0x1FFFFFFF
 uint8_t prime[32] = {0}; // prime in base 16
 uint32_t p[10] = {0};   // prime in base 29
@@ -34,14 +35,6 @@ void PrimeInputs(){
     fclose(input);
 }
 
-void StringToArray(const char *hexstring, uint8_t *dest){
-    int length = strlen(hexstring);
-
-     for (int i = 0; i < 32; i++) {
-        sscanf(hexstring + 2 * i, "%2hhx", &dest[31-i]);
-    }
-}
-
 //Function to print bytes
 void printBytes(uint8_t* num, int bytes) {
     // Find the index of the first non-zero byte from the most significant side
@@ -49,12 +42,12 @@ void printBytes(uint8_t* num, int bytes) {
     while (start >= 0 && num[start] == 0) {
         start--;
     }
-    printf("0x0");
+    fprintf(out, "0x");
     // Print bytes from the first non-zero byte to the least significant byte
     for (int i = start; i >= 0; i--) {
-        printf("%02x", num[i]);
+        fprintf(out, "%02x", num[i]);
     }
-    printf("\n");
+    fprintf(out, "\n");
 }
 
 //Function to convert a number to base 29
@@ -183,6 +176,8 @@ void FieldAddition(uint32_t* num1, uint32_t* num2, uint32_t* sum){
     (IsGreater(sum, p) == 1)? SUB(sum, p, sum, 9) : NULL;   //subtraction 'sum-p' is done using 2's complement
     
 }
+
+//Function to subtract numbers in prime field, num1-num2
 void FieldSubtraction(uint32_t *num1, uint32_t *num2, uint32_t *sub) {
     uint32_t result[20] = {0};
     // Perform modular subtraction num1 - num2 and store the result in 'res'
@@ -249,7 +244,7 @@ void FieldDivision(uint32_t* num1, uint32_t* num2, uint32_t* result) {
 }
 
 //Function to multiply 256 bit in packed form (base 29) by a small constant 
-void Field_ConstMult(uint32_t* num, int constant, uint32_t* result){
+void Field_ConstMult(uint32_t* num, uint32_t constant, uint32_t* result){
     uint64_t mult[20] = {0}; 
 
     // Multiplication by small constant
