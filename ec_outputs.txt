@@ -1,0 +1,32 @@
+Given elliptic curve: y^2 = x^3 + ax + b (mod p) where 
+a = 0x01
+b = 0x71
+
+Given first point (x1,y1):
+x1 : 0x1cdb0c0f208404adbb49e2032a0d43ee4f62ca4c0776cc61bb60adaa1e4cd724
+y1 : 0x87112344fb9b053f122f2c7f58b750f07e6ac40ffb5d48c1757c0e599f1ffb8d
+Given 2nd point (x2,y2):
+x2 : 0xe4e95f48f4d68cf9ec1f627b184e31e7d1d6b7d5d432f1a0ff862d8c13d7060e
+y2 : 0x3f66bc52b330667a6b92d644f41ddccdef2534f233f1aba932cda319d6774d54
+Given points lies on curve.
+
+addition results (x1,y1) + (x2,y2) = (x3,y3):
+x3 : 0xa0f2bc8cffb991e577a4bcc4a1b8d2f2c41b8254acba27a48bdd8571a4abc0c4
+y3 : 0x072fb278dfe7846bb0886d6faef903e895d979e9fbebb2b173247280d7c170e6
+
+doubling results (x1,y1)^2 = (x4,y4):
+x4 : 0x16c77ce78f5b665b13f1ef21d7076621d951e603098dffee2cb0ea2f5fa26b98
+y4 : 0xd976271985f2184f2e36d4db68dd5fcdf883a63624104a0fca3750eb31a4c296
+
+----------------------------------------
+scalar multiplication of (x1,y1) :
+------------------------------------------
+scalar: 0x6bac8b56bfbf8751448c650eb8045825411ee77eda0ba9021ffb465936c446a6
+
+(x5,y5) (using double-and-add method (left to right))-
+x5 : 0xc46f7bca9f2b0aced005f4aaba2ff40b8d33aa6a27acf1063442cb34c2be61dc
+y5 : 0xe8538dbda36fc2ec29d8cf29335ce23a19523e06f43750fb43487bd145220f8c
+
+(x6,y6) (using double-and-add method (right to left))-
+x6 : 0xc46f7bca9f2b0aced005f4aaba2ff40b8d33aa6a27acf1063442cb34c2be61dc
+y6 : 0xe8538dbda36fc2ec29d8cf29335ce23a19523e06f43750fb43487bd145220f8c
