@@ -21,10 +21,10 @@ bool IsPointOnCurve(uint32_t* x, uint32_t* y) {
     FieldMult(x, x, x_cubed);   // x_cubed = x^2
     FieldMult(x_cubed, x, x_cubed); // x_cubed = x^3
 
-    // Calculate 3x mod p
-    FieldMult(x, a, ax); // ax = 3 * x
+    // Calculate ax mod p
+    FieldMult(x, a, ax); // ax = a * x
 
-    // Calculate RHS = x^3 + 3x mod p
+    // Calculate RHS = x^3 + ax mod p
     FieldAddition(x_cubed, ax, rhs);
     FieldAddition(rhs, b, rhs);
 

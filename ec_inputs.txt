@@ -11,10 +11,6 @@ aef501b3627995e0e62ff0d3723e9d972de7bb2c40f1c91b504639c15ad5d91b
 
 
 
-cd9d91993aba5d2b98c85330bc9a999d2375d0549a061c0b29c5454e35a41b29
-988e734f7e795567e01cffe9f9ad023d265ffc7b50da3c32963fd7b9ffa885e5
-
-
 //  INPUTS CORRESPONDING TO CURVE  a = 3, b = 0
 //  first two lines specifies input for a and b
 //  next four lines corresponds to two pair of points on CURVE
